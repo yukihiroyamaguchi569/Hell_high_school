@@ -2,6 +2,10 @@ import streamlit as st
 from openai import OpenAI
 from datetime import datetime
 from pathlib import Path
+import base64
+import io
+import tempfile
+import os
 
 # OpenAI APIキーをsecretsから取得
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
@@ -73,6 +77,26 @@ def init_session_state():
             st.session_state.avatar_image = avatar_data
         else:
             st.session_state.avatar_image = None
+    if 'tts_enabled' not in st.session_state:
+        st.session_state.tts_enabled = True
+
+def generate_speech(text):
+    """Generate speech from text using OpenAI TTS"""
+    try:
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice="alloy",  # 男性の声で挑発的な感じ
+            input=text,
+            speed=0.9  # 少しゆっくりめで威厳のある感じ
+        )
+        
+        # 音声データを一時ファイルに保存
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_file:
+            tmp_file.write(response.content)
+            return tmp_file.name
+    except Exception as e:
+        st.error(f"音声生成エラー: {str(e)}")
+        return None
 
 def load_css():
     """Return CSS for the chat interface"""
@@ -373,6 +397,37 @@ def format_message(role, content, container):
                 </div>
             </div>
             """, unsafe_allow_html=True)
+            
+            # TTSが有効な場合、音声を生成して自動再生
+            if st.session_state.tts_enabled and role == "assistant":
+                audio_file = generate_speech(content)
+                if audio_file:
+                    with open(audio_file, "rb") as f:
+                        audio_bytes = f.read()
+                    
+                    # Base64エンコードしてHTMLに埋め込み
+                    audio_b64 = base64.b64encode(audio_bytes).decode()
+                    
+                    # 自動再生用のHTML
+                    st.markdown(f"""
+                    <audio autoplay style="display: none;">
+                        <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
+                    </audio>
+                    <script>
+                        // 自動再生を確実にするためのJavaScript
+                        document.addEventListener('DOMContentLoaded', function() {{
+                            const audio = document.querySelector('audio[autoplay]');
+                            if (audio) {{
+                                audio.play().catch(function(error) {{
+                                    console.log('自動再生に失敗しました:', error);
+                                }});
+                            }}
+                        }});
+                    </script>
+                    """, unsafe_allow_html=True)
+                    
+                    # 一時ファイルを削除
+                    os.unlink(audio_file)
 
 def handle_submit():
     """Handle message submission"""
@@ -425,6 +480,14 @@ def main():
     
     init_session_state()
     st.markdown(load_css(), unsafe_allow_html=True)
+    
+    # TTS設定のトグルボタン
+    with st.sidebar:
+        st.markdown("### 音声設定")
+        tts_enabled = st.toggle("音声読み上げ", value=st.session_state.tts_enabled)
+        if tts_enabled != st.session_state.tts_enabled:
+            st.session_state.tts_enabled = tts_enabled
+            st.rerun()
     
     # メインコンテンツエリア
     st.markdown('<div class="main-content">', unsafe_allow_html=True)

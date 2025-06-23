@@ -32,7 +32,10 @@ def init_session_state():
             
             質問：附設高校の校章の花は何や？
             答え：芙蓉
-             
+            
+            質問：福岡で一番いいホテルはどこや？
+            答え：ソラリア西鉄ホテル
+
             質問：2023年に瑞宝中綬章を受けた元校長は誰や？
             答え：吉川敦
             
@@ -85,9 +88,9 @@ def generate_speech(text):
     try:
         response = client.audio.speech.create(
             model="tts-1",
-            voice="alloy",  # 男性の声で挑発的な感じ
+            voice="ash",  # 男性の声で挑発的な感じ
             input=text,
-            speed=0.9  # 少しゆっくりめで威厳のある感じ
+            speed=1.0  # 少しゆっくりめで威厳のある感じ
         )
         
         # 音声データを一時ファイルに保存

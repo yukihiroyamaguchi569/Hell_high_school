@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import time
 from datetime import datetime
 import openai
@@ -526,28 +527,48 @@ def display_quiz():
                 st.rerun()  # 入力後に画面を更新
 
 def display_success():
-    st.title("試練クリア！")
-    st.image("src/images/principals-office.png", use_container_width=True)
+ 
+    st.image("src/images/anger-kuromizu.png", use_container_width=True)
     
     st.markdown("""
-    黒水校長は不満げな表情を浮かべながらも、あなたの実力を認めざるを得ない様子だ。
+    最後の問題が解かれた瞬間、校長室の空気がピキリと張り詰め、ひび割れるような音が響く。
+                
+    黒水校長の眉がピクリと動き、手にしていた万年筆が音を立てて砕け散った。
+
+    黒水校長は一歩、机を乗り越えて前に出ると、低く唸るような声で吐き捨てた。            
     
-    「さすがは附設の卒業生じゃ。見事、すべての問題に答えたな」
-    
-    「まあ良かろう。今回は認めてやる。だが、これで終わりと思うなよ」
-    
-    「まだまだ試練は続くぞ。次回も覚悟しておけ！」
-    
-    黒水校長の言葉を背に、あなたは校長室を後にした。
-    
-    この学校を元の姿に戻すには、まだまだ長い道のりがありそうだ...
+    「ちぃぃっ……こげんもんじゃなかっちゃな……よかたい、次は体育館で決着ばつけちゃるばい！」
+
+
+
+
+    言い終えた瞬間、彼の足元にあった床がゴウン……と沈み込む。次の瞬間、床板が裂けるように開き、漆黒の通路が姿を現した。
+
+    校長は迷いなく、その闇の中へと走り去る
+
+    あなた方は、校長を追うように、通路へと駆け出した
+
+    しかし体育館の入口で、黒いドアに行く手を阻まれてしまった。ここから先は選ばれたチームしか進めないようだ
+
     """)
     
-    if st.button("最初からやり直す"):
-        # セッション状態をリセット
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.rerun()
+    # チーム名入力セクション
+    st.markdown("---")
+    
+    # Google FormsのURL
+    form_url = "https://forms.gle/rb4sn5wxWBDssZGy6"
+    
+    st.markdown(f"""
+    ### 以下のフォームを送信せよ！
+    
+    """)
+
+    # フォームの埋め込み表示
+    st.components.v1.iframe(form_url, height=600)
+    
+    st.markdown("---")
+    
+
 
 def display_failure():
     st.title("試練失敗...")

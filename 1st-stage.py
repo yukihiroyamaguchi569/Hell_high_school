@@ -7,8 +7,19 @@ import json
 from typing import Dict, List
 from PIL import Image
 import random
+import threading
+import tempfile
+import os
+import requests
+import soundfile as sf
+import numpy as np
+from io import BytesIO
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# COEIROINKの設定
+COEIROINK_URL = "http://localhost:50031"  # COEIROINKのデフォルトURL
+SPEAKER_ID = "metan"  # メタンのID
 
 def init_session_state():
     if 'game_state' not in st.session_state:
@@ -27,12 +38,12 @@ def init_session_state():
         st.session_state.current_conversation = []
 
 def generate_quizzes():
-    """2つの問題（歴史と英語）と正解を固定で返す"""
+    """3つの問題（歴史と英語と附設の想い出）と正解を固定で返す"""
     quizzes = [
         {
             "subject": "社会",
             "quiz_number": 1,
-            "question": "鎌倉幕府を開いた源頼朝が征夷大将軍に任命されたのは何年ですか？",
+            "question": "鎌倉幕府を開いた源頼朝が征夷大将軍に任命されたのは何年や？",
             "correct_answer": "1192年",
             "acceptable_answers": ["1192年", "1192"],
             "keywords": ["1192"]
@@ -40,14 +51,61 @@ def generate_quizzes():
         {
             "subject": "英語",
             "quiz_number": 2,
-            "question": "次の英文を和訳してください：The rapid development of artificial intelligence has raised both hopes and concerns about the future of work.",
+            "question": "次の英文を和訳してみんね：The rapid development of artificial intelligence has raised both hopes and concerns about the future of work.",
             "correct_answer": "人工知能の急速な発展は、仕事の未来に対して期待と懸念の両方を引き起こしています。",
             "acceptable_answers": ["人工知能の急速な発展は仕事の未来に対して期待と懸念の両方を引き起こしています", "AIの急速な発展は仕事の未来について期待と懸念を生んでいます"],
             "keywords": ["人工知能", "AI", "発展", "仕事", "未来", "期待", "懸念"]
+        },
+        {
+            "subject": "附設の想い出",
+            "quiz_number": 3,
+            "question": "浪人生が行くクラスの名前は？",
+            "correct_answer": "補修科",
+            "acceptable_answers": [""],
+            "keywords": []
         }
-    ]
+        ]
     
     return quizzes
+
+def speak_text(text):
+    """テキストを音声で読み上げる（非同期）"""
+    def speak():
+        try:
+            # 音声合成のリクエストを作成
+            synthesis_request = {
+                "text": text,
+                "speaker": SPEAKER_ID,
+                "speed": 1.0,
+                "pitch": 0.0,
+                "intonation": 1.0,
+                "volume": 1.0
+            }
+            
+            # 音声合成を実行
+            synthesis_response = requests.post(
+                f"{COEIROINK_URL}/synthesis",
+                json=synthesis_request
+            )
+            synthesis_response.raise_for_status()
+            
+            # 音声データを一時ファイルに保存
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_file:
+                temp_file.write(synthesis_response.content)
+                temp_filename = temp_file.name
+            
+            # 音声ファイルを再生
+            st.audio(temp_filename)
+            
+            # 一時ファイルを削除
+            os.unlink(temp_filename)
+            
+        except Exception as e:
+            st.error(f"音声合成中にエラーが発生しました: {str(e)}")
+    
+    # 別スレッドで音声を再生
+    thread = threading.Thread(target=speak)
+    thread.start()
 
 def get_bot_response(user_message=None):
     """黒水校長の返答を生成する"""
@@ -85,6 +143,8 @@ GPTは会話を通して問題を出すゲームの校長役を演じて問題�
             答えてみみんね！
             """
             
+            # 音声で読み上げ
+            speak_text(quiz_instruction)
             return quiz_instruction
             
         else:
@@ -101,6 +161,8 @@ GPTは会話を通して問題を出すゲームの校長役を演じて問題�
             答えてみみんね！
             """
             
+            # 音声で読み上げ
+            speak_text(quiz_instruction)
             return quiz_instruction
             
     else:
@@ -115,45 +177,27 @@ GPTは会話を通して問題を出すゲームの校長役を演じて問題�
             
             さすがは附設の卒業生じゃのう。頭の回転が速かばい！
             """
-            
-            # 全問題終了後の処理
-            if current_quiz_idx + 1 >= len(st.session_state.quizzes):
-                if st.session_state.correct_answers == len(st.session_state.quizzes):
-                    response += """
-                    全問正解！さすがじゃ！お前が本当の附設の卒業生じゃと認めよう。
-                    素晴らしい実力を見せてくれたばい。
-                    """
-                else:
-                    response += f"""
-                    {st.session_state.correct_answers}問正解/{len(st.session_state.quizzes)}問中じゃった。
-                    残念ながら、まだまだじゃのう。もう一度挑戦してくれんか？
-                    """
-            else:
-                response += """
-                次の問題もあるけん、気合い入れていくばい！
-                """
         else:
             response = f"""
             おっと、残念じゃったね！「{user_message}」は不正解じゃった。
             正解は「{current_quiz['correct_answer']}」じゃった。
             """
-            
-            # 全問題終了後の処理
-            if current_quiz_idx + 1 >= len(st.session_state.quizzes):
-                if st.session_state.correct_answers == len(st.session_state.quizzes):
-                    response += """
-                    全問正解！さすがじゃ！お前が本当の附設の卒業生じゃと認めよう。
-                    素晴らしい実力を見せてくれたばい。
-                    """
-                else:
-                    response += f"""
-                    {st.session_state.correct_answers}問正解/{len(st.session_state.quizzes)}問中じゃった。
-                    残念ながら、まだまだじゃのう。もう一度挑戦してくれんか？
-                    """
-            else:
+        
+        # 全問題終了後の処理
+        if current_quiz_idx + 1 >= len(st.session_state.quizzes):
+            if st.session_state.correct_answers == len(st.session_state.quizzes):
                 response += """
-                まだチャンスはあるけん、次の問題も頑張るんばい！
+                全問正解！さすがじゃ！お前が本当の附設の卒業生じゃと認めよう。
+                素晴らしい実力を見せてくれたばい。
                 """
+            else:
+                response += f"""
+                {st.session_state.correct_answers}問正解/{len(st.session_state.quizzes)}問中じゃった。
+                残念ながら、まだまだじゃのう。もう一度挑戦してくれんか？
+                """
+        
+        # 音声で読み上げ
+        speak_text(response)
                 
         # 会話履歴を更新
         st.session_state.current_conversation.append({"role": "user", "content": user_message})
@@ -282,15 +326,27 @@ def display_opening():
     # カラムの比率を変更して中央の列をより大きく
     col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
-        st.image("src/images/opening.png", use_container_width=True)
+        st.image("src/images/manager-room-door.png", use_container_width=True)
     
-    st.markdown("<h1 class='centered-title'>地獄の附設高校</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>暗証番号を入力せよ</h2>", unsafe_allow_html=True)
+    
+    # 暗証番号入力（中央揃え、4桁用の幅）
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        pin_code = st.text_input("暗証番号を入力してください", type="password", placeholder="4桁の数字", max_chars=4, key="pin_input")
+        
+        # 入力値が4桁になったら自動チェック
+        if pin_code and len(pin_code) == 4:
+            if pin_code == "2525":
+                st.success("鍵が開いた・・")
+                # ドアの開く音を再生
+                time.sleep(1)  # 音が再生されるまで少し待機
+                st.session_state.game_state = 'intro'
+                st.rerun()
+            else:
+                st.error("暗証番号が間違っているようだ")
     
     col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        if st.button("ゲームを始める"):
-            st.session_state.game_state = 'clinic'
-            st.rerun()
 
     st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
     
@@ -356,6 +412,8 @@ def display_intro():
 
     """)
     
+    
+    
     if st.button("試練を受ける"):
         init_session_state()
         st.session_state.game_state = 'quiz'
@@ -401,10 +459,10 @@ def display_quiz():
                 
                 # 全問正解したらsuccess、そうでなければfailure
                 if st.session_state.correct_answers == len(st.session_state.quizzes):
-                    st.success(f"おめでとうございます！{len(st.session_state.quizzes)}問全て正解しました！")
+                    st.success(f"なかなかやるな{len(st.session_state.quizzes)}問全て正解ばい！")
                     st.session_state.game_state = 'success'
                 else:
-                    st.error(f"残念...{st.session_state.correct_answers}問正解でした。")
+                    st.error(f"はっはっはっ！{st.session_state.correct_answers}問正解やな。それじゃ卒業生とは認めんけんな！")
                     st.session_state.game_state = 'failure'
                 
                 if st.button("結果を見る"):

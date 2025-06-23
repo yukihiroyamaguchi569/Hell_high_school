@@ -23,7 +23,7 @@ SPEAKER_ID = "metan"  # メタンのID
 
 def init_session_state():
     if 'game_state' not in st.session_state:
-        st.session_state.game_state = 'opening'
+        st.session_state.game_state = 'title'  # 最初の状態を'title'に変更
     if 'messages' not in st.session_state:
         st.session_state.messages = []
     if 'quiz_count' not in st.session_state:
@@ -140,7 +140,7 @@ GPTは会話を通して問題を出すゲームの校長役を演じて問題�
             【問題1】
             「{current_quiz['question']}」
             
-            答えてみみんね！
+            答えてみんね！
             """
             
             # 音声で読み上げ
@@ -287,6 +287,58 @@ def check_answer(user_answer, quiz):
             return True
         
         return False
+
+def display_title():
+    """タイトル画面を表示"""
+    st.markdown(
+        """
+        <style>
+        .title-container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .start-button {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .centered-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 2rem 0;
+        }
+        .stButton > button {
+            display: block;
+            margin: 0 auto;
+            padding: 0.5rem 2rem;
+            font-size: 1.2rem;
+        }
+        /* 画像コンテナのスタイル */
+        .block-container {
+            max-width: 1000px;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # カラムの比率を変更して中央の列をより大きく
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col2:
+        st.image("src/images/title.png", use_container_width=True)
+    
+    # ゲームスタートボタン（中央揃え）
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("ゲームスタート", key="game_start_button"):
+            st.session_state.game_state = 'opening'
+            st.rerun()
+    
+    col1, col2, col3 = st.columns([1, 1, 1])
+
+    st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
 
 def display_opening():
     st.markdown(
@@ -532,7 +584,9 @@ def main():
     
     # 新しいコンテナで画面を構築
     with st.container():
-        if st.session_state.game_state == 'opening':
+        if st.session_state.game_state == 'title':
+            display_title()
+        elif st.session_state.game_state == 'opening':
             display_opening()
         elif st.session_state.game_state == 'clinic':
             display_clinic()

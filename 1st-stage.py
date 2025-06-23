@@ -52,10 +52,10 @@ def generate_quizzes():
         {
             "subject": "英語",
             "quiz_number": 2,
-            "question": "次の英文を和訳してみんね：The rapid development of artificial intelligence has raised both hopes and concerns about the future of work.",
-            "correct_answer": "人工知能の急速な発展は、仕事の未来に対して期待と懸念の両方を引き起こしています。",
-            "acceptable_answers": ["人工知能の急速な発展は仕事の未来に対して期待と懸念の両方を引き起こしています", "AIの急速な発展は仕事の未来について期待と懸念を生んでいます"],
-            "keywords": ["人工知能", "AI", "発展", "仕事", "未来", "期待", "懸念"]
+            "question": "次の分の空欄に入る最も適切な単語はなんだ  If I ___ more time, I would travel around the world.",
+            "correct_answer": "had",
+            "acceptable_answers": ["had"],
+            "keywords": []
         },
         {
             "subject": "附設の想い出",
@@ -518,7 +518,7 @@ def display_quiz():
                     st.error(f"はっはっはっ！{st.session_state.correct_answers}問正解やな。それじゃ卒業生とは認めんけんな！")
                     st.session_state.game_state = 'failure'
                 
-                if st.button("結果を見る"):
+                if st.button("次へ進む"):
                     st.rerun()
             else:
                 # まだ問題が残っている場合、次の問題を表示

@@ -385,7 +385,7 @@ def display_opening():
     # 暗証番号入力（中央揃え、4桁用の幅）
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        pin_code = st.text_input("暗証番号を入力してください", type="password", placeholder="4桁の数字", max_chars=4, key="pin_input")
+        pin_code = st.text_input("", type="password", placeholder="4桁の数字", max_chars=4, key="pin_input")
         
         # 入力値が4桁になったら自動チェック
         if pin_code and len(pin_code) == 4:

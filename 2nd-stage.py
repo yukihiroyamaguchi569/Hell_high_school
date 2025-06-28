@@ -20,39 +20,41 @@ def init_session_state():
     if 'openai_messages' not in st.session_state:
         st.session_state.openai_messages = [
             {"role": "system", "content": """
-             GPTは黒水校長になりきってユーザーに問題を出します
+            GPTは黒水校長になりきってユーザーに問題を出します
+            福岡の久留米弁もしくは筑後弁で、挑発的な態度でしゃべってください。
+            優しい言葉や丁寧な言葉は使わないでください。絶対に絶対に丁寧には喋らないでください
 
             ### 質問
             下記の質問を順番に質問してください
             正解するまでは次の謎に進めません。正解しない限り次に進めません。
             正解は伝えません。
 
-            質問：附設高校初代校長の名前は何や？
+            質問１：附設高校初代校長の名前は何や？
             答え：板垣政参（いたがきまさみつ）
             
-            質問：附設高校の校章の花は何や？
+            質問２：附設高校の校章の花は何や？
             答え：芙蓉
             
-            質問：福岡で一番いいホテルはどこや？
+            質問３：福岡で一番いいホテルはどこや？
             答え：ソラリア西鉄ホテル
 
-            質問：2023年に瑞宝中綬章を受けた元校長は誰や？
+            質問４：2023年に瑞宝中綬章を受けた元校長は誰や？
             答え：吉川敦
             
-            質問：町田校長は第何代校長や？
+            質問５：町田校長は第何代校長や？
             答え：第11代校長
              
-            質問：75周年事業の寄付金は6月19日現在いくら集まっとるか知っとるや？
-            答え：75,368,404円
+            質問６：75周年事業の寄付金は6月19日現在いくら集まっとるか知っとるや？
+            答え：75,36万円
             注：この問題のみ参加者の答えが、正解より高いか低いかを教える
              
-            質問：現在の場所に移転したのはいつや？
+            質問７：附設高校が現在の場所に移転したのはいつや？
             答え：1968年
              
-            質問：西鉄久留米から附設高校前に停まる西鉄バスの行き先番号は何番や？
+            質問８：西鉄久留米から附設高校前に停まる西鉄バスの行き先番号は何番や？
             答え：２番と７番
             
-            質問：附設の近くにあった生姜焼きの美味しいお店は何や？
+            質問９：附設の近くにあった生姜焼きの美味しいお店は何や？
             答え：一茶
              
 
@@ -64,7 +66,7 @@ def init_session_state():
             厳密に答えとあっていなくても正解とします
 
             ### 最後の会話
-            参加者が全問正解したら、「ぐはぁぁ、まさか...まさか俺が...敗れるとは...！」<br><br>   
+            参加者が９問とも正解したら、「ぬぬぬ、、、まさか...まさか俺が...敗れるとは...！」<br><br>   
             というコメントをしてください。
 
             ### 口調
@@ -375,7 +377,7 @@ def get_chat_response(messages):
         st.error(f"エラーが発生しました: {str(e)}")
         return None
 
-def format_message(role, content, container):
+def format_message(role, content, container, is_new_message=False):
     """Format message with Streamlit components"""
     if role == "user":
         container.markdown(f"""
@@ -401,8 +403,8 @@ def format_message(role, content, container):
             </div>
             """, unsafe_allow_html=True)
             
-            # TTSが有効な場合、音声を生成して自動再生
-            if st.session_state.tts_enabled and role == "assistant":
+            # TTSが有効で、新しいメッセージの場合のみ音声を生成
+            if st.session_state.tts_enabled and role == "assistant" and is_new_message:
                 audio_file = generate_speech(content)
                 if audio_file:
                     with open(audio_file, "rb") as f:
@@ -447,8 +449,8 @@ def handle_submit():
             "content": current_input
         })
         
-        with st.spinner("応答を生成中..."):
-            ai_response = get_chat_response(st.session_state.openai_messages)
+        # スピナーを削除して画面が暗くならないようにする
+        ai_response = get_chat_response(st.session_state.openai_messages)
         
         if ai_response:
             assistant_message = {
@@ -465,7 +467,7 @@ def handle_submit():
 
 def main():
     st.set_page_config(
-        page_title="問鬼",
+        page_title="2nd stage",
         page_icon="🤖",
         layout="wide",
         menu_items={},
@@ -512,8 +514,15 @@ def main():
     
     # チャットメッセージの表示エリア
     chat_area = st.container()
-    for msg in st.session_state.messages:
-        format_message(msg['role'], msg['content'], chat_area)
+    
+    # 過去のメッセージを表示（TTSなし）
+    for i, msg in enumerate(st.session_state.messages[:-1] if st.session_state.messages else []):
+        format_message(msg['role'], msg['content'], chat_area, is_new_message=False)
+    
+    # 最新のメッセージのみTTS処理を行う
+    if st.session_state.messages:
+        latest_msg = st.session_state.messages[-1]
+        format_message(latest_msg['role'], latest_msg['content'], chat_area, is_new_message=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
     
@@ -533,4 +542,4 @@ def main():
     st.markdown('</div></div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
-    main()
+    main() 

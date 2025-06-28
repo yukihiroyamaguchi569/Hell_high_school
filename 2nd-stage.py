@@ -388,6 +388,38 @@ def format_message(role, content, container, is_new_message=False):
         </div>
         """, unsafe_allow_html=True)
     else:
+        # TTSが有効で、新しいメッセージの場合のみ音声を先に生成・再生
+        if st.session_state.tts_enabled and is_new_message:
+            audio_file = generate_speech(content)
+            if audio_file:
+                with open(audio_file, "rb") as f:
+                    audio_bytes = f.read()
+                
+                # Base64エンコードしてHTMLに埋め込み
+                audio_b64 = base64.b64encode(audio_bytes).decode()
+                
+                # 音声を先に再生
+                container.markdown(f"""
+                <audio autoplay style="display: none;">
+                    <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
+                </audio>
+                <script>
+                    // 音声再生を確実にするためのJavaScript
+                    document.addEventListener('DOMContentLoaded', function() {{
+                        const audio = document.querySelector('audio[autoplay]');
+                        if (audio) {{
+                            audio.play().catch(function(error) {{
+                                console.log('音声再生に失敗しました:', error);
+                            }});
+                        }}
+                    }});
+                </script>
+                """, unsafe_allow_html=True)
+                
+                # 一時ファイルを削除
+                os.unlink(audio_file)
+        
+        # 音声再生後にメッセージを表示
         cols = container.columns([1, 15])
         
         with cols[0]:
@@ -402,37 +434,6 @@ def format_message(role, content, container, is_new_message=False):
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            
-            # TTSが有効で、新しいメッセージの場合のみ音声を生成
-            if st.session_state.tts_enabled and role == "assistant" and is_new_message:
-                audio_file = generate_speech(content)
-                if audio_file:
-                    with open(audio_file, "rb") as f:
-                        audio_bytes = f.read()
-                    
-                    # Base64エンコードしてHTMLに埋め込み
-                    audio_b64 = base64.b64encode(audio_bytes).decode()
-                    
-                    # 自動再生用のHTML
-                    st.markdown(f"""
-                    <audio autoplay style="display: none;">
-                        <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
-                    </audio>
-                    <script>
-                        // 自動再生を確実にするためのJavaScript
-                        document.addEventListener('DOMContentLoaded', function() {{
-                            const audio = document.querySelector('audio[autoplay]');
-                            if (audio) {{
-                                audio.play().catch(function(error) {{
-                                    console.log('自動再生に失敗しました:', error);
-                                }});
-                            }}
-                        }});
-                    </script>
-                    """, unsafe_allow_html=True)
-                    
-                    # 一時ファイルを削除
-                    os.unlink(audio_file)
 
 def handle_submit():
     """Handle message submission"""

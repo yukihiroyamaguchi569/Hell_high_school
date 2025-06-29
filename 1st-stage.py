@@ -1,20 +1,11 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import time
-from datetime import datetime
-import openai
 from openai import OpenAI
-import json
-from typing import Dict, List
-from PIL import Image
-import random
 import threading
 import tempfile
 import os
 import requests
-import soundfile as sf
-import numpy as np
-from io import BytesIO
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -115,24 +106,6 @@ def get_bot_response(user_message=None):
     # 初期メッセージまたは現在の問題
     if user_message is None:
         if current_quiz_idx == 0:
-            # 初回メッセージ
-            system_content = """
-## 役割
-GPTは会話を通して問題を出すゲームの校長役を演じて問題をだします。
-喋るのは久留米弁です。
-
-## 設定
-久留米大学附設高校は悪の校長黒水校長の支配する、地獄の高校と成り果てていた。この状況を救うべく立ち上がった卒業生たちは、黒水校長と対決する
-
-訪れた卒業生に対して、黒水校長は本当に附設の卒業生か試すために問題を出します。
-
-##最初の会話
-なんね？附設の卒業生やと？？この高校を元に戻したい？？
-何を言うとるのかわからんが、それなら附設を卒業したっちゅうことば証明してみみんね！覚悟はよかとや！？
-
-今からお前らに問題を出す。2問連続で正解せんと、卒業生とは認めんけん覚悟しとけ！！
-            """
-            
             # 1問目を出題
             current_quiz = st.session_state.quizzes[0]
             quiz_instruction = f"""
@@ -218,14 +191,6 @@ def check_answer(user_answer, quiz):
         return False
     
     try:
-        # 正解情報をまとめる
-        correct_info = {
-            "question": quiz["question"],
-            "correct_answer": quiz["correct_answer"],
-            "acceptable_answers": quiz["acceptable_answers"],
-            "keywords": quiz["keywords"]
-        }
-        
         # APIリクエスト用のプロンプト
         prompt = f"""
         以下の回答が正解かどうか判定してください：

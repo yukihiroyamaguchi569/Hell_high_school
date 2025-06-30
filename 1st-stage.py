@@ -25,7 +25,7 @@ def init_session_state():
         st.session_state.openai_messages = [
             {"role": "system", "content": """
             GPTは黒水校長になりきってユーザーに問題を出します
-            福岡の久留米弁もしくは筑後弁で、挑発的な態度でしゃべってください。
+            福岡の筑後弁で、挑発的な態度でしゃべってください。
             優しい言葉や丁寧な言葉は使わないでください。絶対に絶対に丁寧には喋らないでください
 
             ### 質問
@@ -147,19 +147,6 @@ def load_css():
             text-align: center;
             margin-bottom: 2rem;
             background-color: #212121 !important;
-        }
-        
-        .main-title {
-            color: white;
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .subtitle {
-            color: #888;
-            font-size: 1rem;
-            max-width: 600px;
-            text-align: center;
         }
         
         /* メッセージコンテナのスタイル */
@@ -290,30 +277,6 @@ def load_css():
             box-shadow: none !important;
             border: none !important;
         }
-
-        /* チャットコンテナのスタイル */
-        .chat-container {
-            margin-bottom: 100px;
-            padding-bottom: 20px;
-            background-color: #212121 !important;
-        }
-        
-        /* Streamlitのimage要素のスタイル */
-        .avatar-image {
-            width: 40px !important;
-            height: 40px !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        
-        .avatar-image > div {
-            margin: 0 !important;
-        }
-        
-        /* スピナーの色を設定 */
-        .stSpinner > div {
-            border-color: white !important;
-        }
         
         /* プレースホルダーテキストの色 */
         .stTextInput > div > div > input::placeholder {
@@ -340,26 +303,10 @@ def load_css():
             background-color: #212121 !important;
         }
 
-        .row-widget {
-            margin: 0 !important;
-            padding: 0 !important;
-            background-color: #212121 !important;
-        }
-
         /* タイトル画面用のスタイル */
         .title-container {
             text-align: center;
             padding: 2rem;
-        }
-        .start-button {
-            text-align: center;
-            margin-top: 2rem;
-        }
-        .centered-title {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 2rem 0;
         }
         .stButton > button {
             display: block;
@@ -482,40 +429,6 @@ def handle_submit():
 
 def display_title():
     """タイトル画面を表示"""
-    st.markdown(
-        """
-        <style>
-        .title-container {
-            text-align: center;
-            padding: 2rem;
-        }
-        .start-button {
-            text-align: center;
-            margin-top: 2rem;
-        }
-        .centered-title {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 2rem 0;
-        }
-        .stButton > button {
-            display: block;
-            margin: 0 auto;
-            padding: 0.5rem 2rem;
-            font-size: 1.2rem;
-        }
-        /* 画像コンテナのスタイル */
-        .block-container {
-            max-width: 1000px;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    
     # カラムの比率を変更して中央の列をより大きく
     col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
@@ -533,40 +446,6 @@ def display_title():
     st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
 
 def display_opening():
-    st.markdown(
-        """
-        <style>
-        .title-container {
-            text-align: center;
-            padding: 2rem;
-        }
-        .start-button {
-            text-align: center;
-            margin-top: 2rem;
-        }
-        .centered-title {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 2rem 0;
-        }
-        .stButton > button {
-            display: block;
-            margin: 0 auto;
-            padding: 0.5rem 2rem;
-            font-size: 1.2rem;
-        }
-        /* 画像コンテナのスタイル */
-        .block-container {
-            max-width: 1000px;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    
     # カラムの比率を変更して中央の列をより大きく
     col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
@@ -636,21 +515,20 @@ def display_success():
     st.markdown("---")
 
 def display_quiz():
-    st.title("黒水校長の試練")
+    st.markdown("<h1 style='text-align: center;'>黒水校長の試練</h1>", unsafe_allow_html=True)
     
     # メッセージがない場合のみタイトルと説明を表示
     if not st.session_state.messages:
         # より均等な配置のためのcolumns設定
-        col1, col2, col3 = st.columns([2, 1, 2])  # 比率を[1, 2, 1]に変更してより中央に寄せる
+        col1, col2, col3 = st.columns([1, 2, 1])  # 比率を[1, 2, 1]に変更してより中央に寄せる
         with col2:
-            st.image("src/images/principals-office.png", width=400)
+            st.image("src/images/principals-office.png", width=1200)
  
         st.markdown("""
             <div style="background-color: #212121;">
-                <div class="title-container">
-                    <div class="main-title">黒水校長の試練</div>
-                    <div class="subtitle">なんね？附設の卒業生やと？？この高校を元に戻せ？？<br>何を言うとるのかわからんが、それなら附設を卒業したっちゅうことば証明してみんね！<br>今からお前らに問題を出す。3問連続で正解せんと、卒業生とは認めんけん覚悟しとけ！！</div>
-                </div>
+                <h2 class="title-container" style="font-size: 1.5rem; margin: 0; padding: 0;">
+                    <div class="subtitle">なんね、あんたら？元の附設にもどしたい？<br>そんならおいの質問に答えてみんね？<br>卒業生なら、簡単に答えられるやろう<br>準備はええかね？</div>
+                </h2>
             </div>
         """, unsafe_allow_html=True)
     

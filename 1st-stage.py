@@ -100,7 +100,7 @@ def init_session_state():
             答え：男く祭（おとこくさい）
             
             質問１０：附設高校が共学になった年は？
-            答え：2013年
+            答え：2005年
             
 
             ###出題方法
@@ -522,9 +522,36 @@ def display_opening():
         # 入力値が4桁になったら自動チェック
         if pin_code and len(pin_code) == 4:
             if pin_code == "2525":
+                # ドアが開く音を再生
+                try:
+                    with open("src/audio/door-open.mp3", "rb") as f:
+                        audio_bytes = f.read()
+                    
+                    # Base64エンコードしてHTMLに埋め込み
+                    audio_b64 = base64.b64encode(audio_bytes).decode()
+                    
+                    st.markdown(f"""
+                    <audio autoplay style="display: none;">
+                        <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
+                    </audio>
+                    <script>
+                        // 音声再生を確実にするためのJavaScript
+                        document.addEventListener('DOMContentLoaded', function() {{
+                            const audio = document.querySelector('audio[autoplay]');
+                            if (audio) {{
+                                audio.play().catch(function(error) {{
+                                    console.log('音声再生に失敗しました:', error);
+                                }});
+                            }}
+                        }});
+                    </script>
+                    """, unsafe_allow_html=True)
+                except FileNotFoundError:
+                    st.warning("音声ファイルが見つかりません: src/audio/door-open.mp3")
+                
                 st.success("鍵が開いた・・")
-                # ドアの開く音を再生
-                time.sleep(1)  # 音が再生されるまで少し待機
+                # 音が再生されるまで少し待機
+                time.sleep(2)
                 st.session_state.game_state = 'quiz'
                 st.rerun()
             else:

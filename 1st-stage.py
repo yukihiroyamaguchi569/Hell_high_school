@@ -446,7 +446,7 @@ def format_message(role, content, container, is_new_message=False):
         
         with cols[0]:
             if st.session_state.avatar_image:
-                st.image(st.session_state.avatar_image, width=40)
+                st.image(st.session_state.avatar_image, width=80)
         
         with cols[1]:
             st.markdown(f"""

@@ -13,7 +13,7 @@ import streamlit.components.v1 as components
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # 画像のパスを設定
-AVATAR_PATH = Path("src/images/principals-office.png")
+AVATAR_PATH = Path("src/images/opening.png")
 
 def init_session_state():
     """Initialize session state variables"""
@@ -517,11 +517,11 @@ def display_opening():
     # 暗証番号入力（中央揃え、4桁用の幅）
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        pin_code = st.text_input("", type="password", placeholder="4桁の数字", max_chars=4, key="pin_input")
+        pin_code = st.text_input("", type="password", placeholder="６桁の数字", max_chars=6, key="pin_input")
         
         # 入力値が4桁になったら自動チェック
-        if pin_code and len(pin_code) == 4:
-            if pin_code == "2525":
+        if pin_code and len(pin_code) == 6:
+            if pin_code == "442222":
                 # ドアが開く音を再生
                 try:
                     with open("src/audio/door-open.mp3", "rb") as f:

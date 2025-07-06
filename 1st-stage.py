@@ -18,7 +18,7 @@ AVATAR_PATH = Path("src/images/principals-office.png")
 def init_session_state():
     """Initialize session state variables"""
     if 'game_state' not in st.session_state:
-        st.session_state.game_state = 'title'  # 最初の状態を'title'に変更
+        st.session_state.game_state = 'title'  # 'success'から'title'に戻す
     if 'messages' not in st.session_state:
         st.session_state.messages = []
     if 'openai_messages' not in st.session_state:
@@ -562,7 +562,10 @@ def display_opening():
     st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
 
 def display_success():
-    st.image("src/images/anger-kuromizu.png", use_container_width=True)
+    # カラムの比率を変更して中央の列をより大きく
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col2:
+        st.image("src/images/anger-kuromizu.png", use_container_width=True)
     
     st.markdown("""
     最後の問題が解かれた瞬間、校長室の空気がピキリと張り詰め、ひび割れるような音が響く。
@@ -573,9 +576,6 @@ def display_success():
     
     「ちぃぃっ……こげんもんじゃなかっちゃな……よかたい、次は体育館で決着ばつけちゃるばい！」
 
-
-
-
     言い終えた瞬間、彼の足元にあった床がゴウン……と沈み込む。次の瞬間、床板が裂けるように開き、漆黒の通路が姿を現した。
 
     校長は迷いなく、その闇の中へと走り去る
@@ -583,24 +583,28 @@ def display_success():
     あなた方は、校長を追うように、通路へと駆け出した
 
     しかし体育館の入口で、黒いドアに行く手を阻まれてしまった。ここから先は選ばれたチームしか進めないようだ
-
     """)
     
-    # チーム名入力セクション
-    st.markdown("---")
+    # フォーム画面への遷移ボタン
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("フォームを送信する", key="form_button"):
+            st.session_state.game_state = 'form'
+            st.rerun()
+
+def display_form():
+    st.markdown("<h1 style='text-align: center;'>チーム登録フォーム</h1>", unsafe_allow_html=True)
     
     # Google FormsのURL
     form_url = "https://forms.gle/rb4sn5wxWBDssZGy6"
     
     st.markdown(f"""
     ### 以下のフォームを送信せよ！
-    
     """)
 
     # フォームの埋め込み表示
     st.components.v1.iframe(form_url, height=600)
     
-    st.markdown("---")
 
 def display_quiz():
     st.markdown("<h1 style='text-align: center;'>黒水校長の試練</h1>", unsafe_allow_html=True)
@@ -695,6 +699,8 @@ def main():
         display_quiz()
     elif st.session_state.game_state == 'success':
         display_success()
+    elif st.session_state.game_state == 'form':
+        display_form()
     
     st.markdown('</div>', unsafe_allow_html=True)
 

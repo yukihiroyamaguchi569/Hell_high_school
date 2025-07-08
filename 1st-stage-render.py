@@ -105,7 +105,6 @@ def init_session_state():
             質問１０：附設高校が共学になった年はわかるや？
             答え：2005年
             
-
             ###出題方法
             ヒントはださないでください
             答えを聞かれても教えてないでください
@@ -113,6 +112,22 @@ def init_session_state():
             ### 正誤の判定方法
             厳密に答えとあっていなくても正解とします
             「わからない」「分からない」「知らない」などの回答は不正解とします
+            
+            ### 予備知識 回答の参考にしてください
+            補習科があるのは珍しいらしい
+            
+            #####歴代校長
+                初代 1950-1959 板垣政参
+                二代 1959-1961 楢崎広之助
+                三代 1961-1965 大内覚之助
+                四代 1965-1979 原巳冬
+                五代 1979-1990 世良忠彦
+                六代 1990-1993 緒方道彦
+                七代 1993-1998 鹿毛勲臣
+                八代 1998-2007 樋口忠治
+                九代 2007-2008 古田智信
+                十代 2008-2017 吉川敦
+                十一代 2017- 町田健
 
             ### 最後の会話
             参加者が10問とも正解したら、「間近！全問正解かい」というコメントをしてください。
@@ -337,6 +352,10 @@ def load_css():
             padding-bottom: 2rem;
         }
 
+        .center-text {
+            text-align: center;
+        }
+
     </style>
     """
 
@@ -548,7 +567,14 @@ def display_quiz_intro():
 
 def display_quiz():
     st.markdown("<h1 style='text-align: center;'>黒水校長の試練</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center;'>問題を出してみろ！と入力してスタートせよ</h3>", unsafe_allow_html=True)
+    st.markdown("""
+<style>
+.center-text {
+    text-align: center;
+}
+</style>
+""", unsafe_allow_html=True)
+    st.markdown('<p class="center-text">問題を出してみろ！と入力してスタートせよ</p>', unsafe_allow_html=True)
     
     # チャットメッセージの表示エリア
     chat_area = st.container()

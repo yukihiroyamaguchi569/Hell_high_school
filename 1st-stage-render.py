@@ -1,13 +1,10 @@
 import streamlit as st
 from openai import OpenAI
-from datetime import datetime
 from pathlib import Path
 import base64
 import io
-import tempfile
 import os
 import time
-import streamlit.components.v1 as components
 
 # OpenAI APIキーを環境変数から取得（Render.com用）
 def get_openai_api_key():
@@ -25,7 +22,7 @@ AVATAR_PATH = Path("src/images/opening.png")
 def init_session_state():
     """Initialize session state variables"""
     if 'game_state' not in st.session_state:
-        st.session_state.game_state = 'title'  # 'success'から'title'に戻す
+        st.session_state.game_state = 'title'  
     if 'messages' not in st.session_state:
         st.session_state.messages = []
     if 'openai_messages' not in st.session_state:
@@ -147,10 +144,13 @@ def generate_speech(text):
             speed=1.0  # 少しゆっくりめで威厳のある感じ
         )
         
-        # 音声データを一時ファイルに保存
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_file:
-            tmp_file.write(response.content)
-            return tmp_file.name
+        # メモリ上で直接処理
+        audio_buffer = io.BytesIO()
+        audio_buffer.write(response.content)
+        audio_buffer.seek(0)
+        audio_bytes = audio_buffer.read()
+        
+        return audio_bytes
     except Exception as e:
         st.error(f"音声生成エラー: {str(e)}")
         return None
@@ -417,11 +417,8 @@ def format_message(role, content, container, is_new_message=False):
     else:
         # TTSが有効で、新しいメッセージの場合のみ音声を先に生成・再生
         if st.session_state.tts_enabled and is_new_message:
-            audio_file = generate_speech(content)
-            if audio_file:
-                with open(audio_file, "rb") as f:
-                    audio_bytes = f.read()
-                
+            audio_bytes = generate_speech(content)
+            if audio_bytes:
                 # Base64エンコードしてHTMLに埋め込み
                 audio_b64 = base64.b64encode(audio_bytes).decode()
                 
@@ -442,9 +439,6 @@ def format_message(role, content, container, is_new_message=False):
                     }});
                 </script>
                 """, unsafe_allow_html=True)
-                
-                # 一時ファイルを削除
-                os.unlink(audio_file)
         
         # 音声再生後にメッセージを表示
         cols = container.columns([1, 15])
@@ -522,7 +516,7 @@ def display_opening():
     # 暗証番号入力（中央揃え、4桁用の幅）
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        pin_code = st.text_input("", type="password", placeholder="６桁の数字", max_chars=6, key="pin_input")
+        pin_code = st.text_input("暗証番号", type="password", placeholder="６桁の数字", max_chars=6, key="pin_input", label_visibility="collapsed")
         
         # 入力値が4桁になったら自動チェック
         if pin_code and len(pin_code) == 6:

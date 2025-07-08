@@ -215,72 +215,26 @@ def load_css():
             background-color: #212121 !important;
         }
         
-        /* メッセージコンテナのスタイル */
-        .message-container {
-            display: flex;
-            margin: 0 auto;
-            padding: 18px 0.75rem;
-            width: 100%;
-            font-size: 1rem;
+        /* st.chat_messageのスタイル調整 */
+        .stChatMessage {
             background-color: #212121 !important;
         }
-
-        /* レスポンシブパディング設定 */
-        @media (min-width: 768px) {
-            .message-container {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .message-container {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-        }
-
-        @media (min-width: 1280px) {
-            .message-container {
-                padding-left: 1.25rem;
-                padding-right: 1.25rem;
-            }
-        }
-
-        /* ユーザーメッセージのスタイル */
-        .user-message-container {
-            justify-content: flex-end !important;
-            margin-left: auto;
-            width: 100%;
-        }
         
-        .user-message {
-            background-color: #2F2F2F;
-            padding: 1rem;
-            border-radius: 10px;
-            color: white;
-            max-width: 70%;
-            margin-left: auto;
+        /* ユーザーメッセージのスタイル */
+        .stChatMessage[data-testid="chatMessage"] {
+            background-color: #212121 !important;
         }
         
         /* アシスタントメッセージのスタイル */
-        .assistant-message-container {
-            justify-content: flex-start;
-            width: 100%;
+        .stChatMessage[data-testid="chatMessage"] .stChatMessageContent {
+            background-color: #383838 !important;
+            color: white !important;
         }
         
-        .assistant-message {
-            background-color: #383838;
-            padding: 1rem;
-            border-radius: 10px;
-            color: white;
-            max-width: 70%;
-            margin-right: auto;
-        }
-
-        .message-text {
-            margin: 0;
-            padding: 0;
+        /* ユーザーメッセージのスタイル */
+        .stChatMessage[data-testid="chatMessage"] .stChatMessageContent[data-testid="user"] {
+            background-color: #2F2F2F !important;
+            color: white !important;
         }
         /* 入力フィールドのスタイル */
         .stTextInput {
@@ -407,13 +361,8 @@ def get_chat_response(messages):
 def format_message(role, content, container, is_new_message=False):
     """Format message with Streamlit components"""
     if role == "user":
-        container.markdown(f"""
-        <div class="message-container user-message-container">
-            <div class="user-message">
-                <p class="message-text">{content}</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        with container.chat_message("user"):
+            st.write(content)
     else:
         # TTSが有効で、新しいメッセージの場合のみ音声を先に生成・再生
         if st.session_state.tts_enabled and is_new_message:
@@ -441,20 +390,8 @@ def format_message(role, content, container, is_new_message=False):
                 """, unsafe_allow_html=True)
         
         # 音声再生後にメッセージを表示
-        cols = container.columns([1, 15])
-        
-        with cols[0]:
-            if st.session_state.avatar_image:
-                st.image(st.session_state.avatar_image, width=80)
-        
-        with cols[1]:
-            st.markdown(f"""
-            <div class="message-container assistant-message-container">
-                <div class="assistant-message">
-                    <p class="message-text">{content}</p>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        with container.chat_message("assistant", avatar=st.session_state.avatar_image):
+            st.write(content)
 
 def handle_submit():
     """Handle message submission"""

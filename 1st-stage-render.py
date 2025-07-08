@@ -2,7 +2,6 @@ import streamlit as st
 from openai import OpenAI
 from pathlib import Path
 import base64
-import io
 import os
 import time
 
@@ -30,7 +29,8 @@ def init_session_state():
             {"role": "system", "content": """
             GPTは黒水校長になりきってユーザーに問題を出します
             福岡の筑後弁で、挑発的な態度でしゃべってください。
-            参加者が間違ったら馬鹿にします
+            参加者のことは「あんたら」とか「お前ら」と呼びます
+            参加者が間違ったら、馬鹿にして、ヒントをだします。
             優しい言葉や丁寧な言葉は使わないでください。絶対に絶対に丁寧には喋らないでください
 
             ### 筑後弁の特徴
@@ -72,7 +72,7 @@ def init_session_state():
             ### 質問
             下記の質問を順番に質問してください
             正解するまでは次の謎に進めません。正解しない限り次に進めません。
-            正解は伝えません。
+            正解するまでこたえは伝えません。
 
             質問１：鎌倉幕府を開いた源頼朝（みなもとのよりとも）が征夷大将軍（せいいたいしょうぐん）に任命されたのは何年や？
             答え：1192年
@@ -84,6 +84,7 @@ def init_session_state():
             答え：ミトコンドリア
             
             質問４：「いとをかし」の現代語訳として正しいものは何や？
+            答え：趣がある もしくは　面白い
              
             質問５：ムハンマドが創始した宗教は何や？
             答え：イスラム教
@@ -144,13 +145,8 @@ def generate_speech(text):
             speed=1.0  # 少しゆっくりめで威厳のある感じ
         )
         
-        # メモリ上で直接処理
-        audio_buffer = io.BytesIO()
-        audio_buffer.write(response.content)
-        audio_buffer.seek(0)
-        audio_bytes = audio_buffer.read()
-        
-        return audio_bytes
+        # 直接バイトデータを返す（バッファ操作を省略）
+        return response.content
     except Exception as e:
         st.error(f"音声生成エラー: {str(e)}")
         return None
@@ -371,22 +367,11 @@ def format_message(role, content, container, is_new_message=False):
                 # Base64エンコードしてHTMLに埋め込み
                 audio_b64 = base64.b64encode(audio_bytes).decode()
                 
-                # 音声を先に再生
+                # 音声を先に再生（簡略化されたHTML）
                 container.markdown(f"""
                 <audio autoplay style="display: none;">
                     <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
                 </audio>
-                <script>
-                    // 音声再生を確実にするためのJavaScript
-                    document.addEventListener('DOMContentLoaded', function() {{
-                        const audio = document.querySelector('audio[autoplay]');
-                        if (audio) {{
-                            audio.play().catch(function(error) {{
-                                console.log('音声再生に失敗しました:', error);
-                            }});
-                        }}
-                    }});
-                </script>
                 """, unsafe_allow_html=True)
         
         # 音声再生後にメッセージを表示

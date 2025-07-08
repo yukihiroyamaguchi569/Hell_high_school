@@ -473,7 +473,7 @@ def display_opening():
                 st.success("鍵が開いた・・")
                 # 音が再生されるまで少し待機
                 time.sleep(2)
-                st.session_state.game_state = 'quiz'
+                st.session_state.game_state = 'quiz_intro'
                 st.rerun()
             else:
                 st.error("暗証番号が間違っているようだ")
@@ -522,23 +522,33 @@ def display_form():
     st.components.v1.iframe(form_url, height=600)
     
 
-def display_quiz():
+def display_quiz_intro():
+    """クイズ開始前のイントロ画面を表示"""
     st.markdown("<h1 style='text-align: center;'>黒水校長の試練</h1>", unsafe_allow_html=True)
     
-    # メッセージがない場合のみタイトルと説明を表示
-    if not st.session_state.messages:
-        # より均等な配置のためのcolumns設定
-        col1, col2, col3 = st.columns([1, 2, 1])  # 比率を[1, 2, 1]に変更してより中央に寄せる
-        with col2:
-            st.image("src/images/principals-office.png", width=1200)
+    # より均等な配置のためのcolumns設定
+    col1, col2, col3 = st.columns([1, 2, 1])  # 比率を[1, 2, 1]に変更してより中央に寄せる
+    with col2:
+        st.image("src/images/principals-office.png", width=1200)
  
-        st.markdown("""
-            <div style="background-color: #212121;">
-                <h2 class="title-container" style="font-size: 1.5rem; margin: 0; padding: 0;">
-                    <div class="subtitle">なんね、あんたら？元の附設にもどしたい？<br>そんならおいの質問に答えてみんね？<br>卒業生なら、簡単に答えられるやろう<br>準備はええかね？</div>
-                </h2>
-            </div>
-        """, unsafe_allow_html=True)
+    st.markdown("""
+        <div style="background-color: #212121;">
+            <h2 class="title-container" style="font-size: 1.5rem; margin: 0; padding: 0;">
+                <div class="subtitle">なんね、あんたら？元の附設にもどしたい？<br>そんならおいの質問に答えてみんね？<br>卒業生なら、簡単に答えられるやろう<br>準備はええかね？</div>
+            </h2>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # 「はい」ボタンを中央に配置
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("はい", key="quiz_start_button", use_container_width=True):
+            st.session_state.game_state = 'quiz'
+            st.rerun()
+
+def display_quiz():
+    st.markdown("<h1 style='text-align: center;'>黒水校長の試練</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>問題を出してみろ！と入力してスタートせよ</h3>", unsafe_allow_html=True)
     
     # チャットメッセージの表示エリア
     chat_area = st.container()
@@ -611,6 +621,8 @@ def main():
         display_title()
     elif st.session_state.game_state == 'opening':
         display_opening()
+    elif st.session_state.game_state == 'quiz_intro':
+        display_quiz_intro()
     elif st.session_state.game_state == 'quiz':
         display_quiz()
     elif st.session_state.game_state == 'success':

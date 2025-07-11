@@ -18,6 +18,16 @@ client = OpenAI(api_key=get_openai_api_key())
 # 画像のパスを設定
 AVATAR_PATH = Path("src/images/opening.png")
 
+def load_prompt_from_file():
+    """プロンプトをファイルから読み込む"""
+    try:
+        with open("prompt.txt", "r", encoding="utf-8") as f:
+            prompt_content = f.read()
+        return prompt_content
+    except Exception as e:
+        st.error(f"プロンプトファイルの読み込みエラー: {str(e)}")
+        return None
+
 def init_session_state():
     """Initialize session state variables"""
     if 'game_state' not in st.session_state:
@@ -25,8 +35,16 @@ def init_session_state():
     if 'messages' not in st.session_state:
         st.session_state.messages = []
     if 'openai_messages' not in st.session_state:
-        st.session_state.openai_messages = [
-            {"role": "system", "content": """
+        # プロンプトをファイルから読み込む
+        prompt_content = load_prompt_from_file()
+        if prompt_content:
+            st.session_state.openai_messages = [
+                {"role": "system", "content": prompt_content}
+            ]
+        else:
+            # ファイル読み込みに失敗した場合は既存のプロンプトを使用
+            st.session_state.openai_messages = [
+                {"role": "system", "content": """
             GPTは黒水校長になりきってユーザーに問題を出します
             福岡の筑後弁で、挑発的な態度でしゃべってください。
             参加者のことは「あんたら」とか「お前ら」と呼びます
@@ -167,8 +185,8 @@ def init_session_state():
             福岡の筑後弁で挑発的な態度でしゃべってください。
             優しい言葉や丁寧な言葉は使わないでください。絶対に絶対に丁寧には喋らないでください
             """
-            }
-        ]
+                }
+            ]
     if 'avatar_image' not in st.session_state:
         if AVATAR_PATH.exists():
             with open(AVATAR_PATH, "rb") as f:

@@ -675,8 +675,6 @@ def main():
         display_quiz()
     elif st.session_state.game_state == 'success':
         display_success()
-    elif st.session_state.game_state == 'form':
-        display_form()
     
     st.markdown('</div>', unsafe_allow_html=True)
 

@@ -199,17 +199,54 @@ def init_session_state():
     if 'quiz_completed' not in st.session_state:
         st.session_state.quiz_completed = False
 
+def apply_pronunciation_guides(text):
+    """読み方が難しい言葉にふりがなや読み方のヒントを付ける"""
+    # 読み方マッピング辞書（漢字: 読み方の表記）
+    pronunciation_map = {
+        "源頼朝": "源頼朝みなもとのよりとも",
+        "征夷大将軍": "せいいたいしょうぐん",
+        "趣":"おもむき",
+        "浪人生":"ろうにんせい",
+        "板垣政参": "いたがきまさみつ",
+        "瑞宝中綬章": "ずいほうちゅうじゅしょう",
+        "裏店": "うらみせ",
+        "肉飯": "にくめし",
+        "男く祭": "おとこくさい",
+        "芙蓉": "ふよう",
+        "西鉄": "にしてつ",
+        "久留米":"くるめ",
+        "チーム１":"チームいち",
+        "チーム２":"チームに",
+        "チーム３":"チームさん",
+        "チーム４":"チームよん",
+        "チーム５":"チームご",
+        "1192":"せんひゃくきゅうじゅうに",
+        "2005":"にせんご",
+        "1968":"せんきゅうひゃくろうじゅうはち",
+        "吉川敦": "よしかわあつし"
+
+    }
+    
+    # 辞書内の各項目に対して読み方を追加
+    for word, reading in pronunciation_map.items():
+        if word in text and word != reading:  # 既に読み方が付いていない場合のみ
+            text = text.replace(word, reading)
+    
+    return text
+
 def generate_speech(text):
     """Generate speech from text using OpenAI TTS"""
     try:
+        # 読み方ガイドを適用
+        modified_text = apply_pronunciation_guides(text)
+        
         response = client.audio.speech.create(
             model="tts-1",
-            voice="ash",  # 男性の声で挑発的な感じ
-            input=text,
-            speed=1.0  # 少しゆっくりめで威厳のある感じ
+            voice="ash",
+            input=modified_text,
+            speed=1.0
         )
         
-        # 直接バイトデータを返す（バッファ操作を省略）
         return response.content
     except Exception as e:
         st.error(f"音声生成エラー: {str(e)}")
@@ -422,29 +459,56 @@ def get_chat_response(messages):
         st.error(f"エラーが発生しました: {str(e)}")
         return None
 
+def convert_to_hiragana(text):
+    """難しい漢字や固有名詞をひらがなに変換"""
+    # 変換マッピング
+    conversion_map = {
+        "源頼朝": "みなもとのよりとも",
+        "征夷大将軍": "せいいたいしょうぐん",
+        "鎌倉幕府": "かまくらばくふ",
+        "板垣政参": "いたがきまさみつ",
+        "瑞宝中綬章": "ずいほうちゅうじゅしょう",
+        "裏店": "うらみせ",
+        "男く祭": "おとこくさい",
+        "芙蓉": "ふよう"
+    }
+    
+    # 表示用テキストと音声用テキストを分ける
+    display_text = text
+    speech_text = text
+    
+    for word, reading in conversion_map.items():
+        if word in speech_text:
+            speech_text = speech_text.replace(word, reading)
+    
+    return display_text, speech_text
+
 def format_message(role, content, container, is_new_message=False):
     """Format message with Streamlit components"""
     if role == "user":
         with container.chat_message("user"):
             st.write(content)
     else:
+        # 表示用テキストと音声用テキストを分ける
+        display_text, speech_text = convert_to_hiragana(content)
+        
         # TTSが有効で、新しいメッセージの場合のみ音声を先に生成・再生
         if st.session_state.tts_enabled and is_new_message:
-            audio_bytes = generate_speech(content)
+            audio_bytes = generate_speech(speech_text)  # ひらがな変換したテキストを使用
             if audio_bytes:
                 # Base64エンコードしてHTMLに埋め込み
                 audio_b64 = base64.b64encode(audio_bytes).decode()
                 
-                # 音声を先に再生（簡略化されたHTML）
+                # 音声を先に再生
                 container.markdown(f"""
                 <audio autoplay style="display: none;">
                     <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
                 </audio>
                 """, unsafe_allow_html=True)
         
-        # 音声再生後にメッセージを表示
+        # 音声再生後に元のテキストを表示
         with container.chat_message("assistant", avatar=st.session_state.avatar_image):
-            st.write(content)
+            st.write(display_text)  # 元のテキストを表示
 
 def handle_submit():
     """Handle message submission"""

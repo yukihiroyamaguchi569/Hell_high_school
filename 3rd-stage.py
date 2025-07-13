@@ -516,7 +516,7 @@ def display_quiz_intro():
             st.rerun()
 
 def display_quiz():
-    st.markdown("<h1 style='text-align: center;'>黒水校長の試練</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>黒水校長の質問をクリアせよ！</h1>", unsafe_allow_html=True)
     st.markdown("""
 <style>
 .center-text {
@@ -539,7 +539,7 @@ def display_quiz():
         format_message(latest_msg['role'], latest_msg['content'], chat_area, is_new_message=True)
         
         # 最後のメッセージが成功メッセージかチェック
-        if "全問正解" in latest_msg['content'] and not st.session_state.quiz_completed:
+        if "全問正解かい" in latest_msg['content'] and not st.session_state.quiz_completed:
             st.session_state.quiz_completed = True
             st.session_state.game_state = 'success'
             st.rerun()

@@ -512,7 +512,7 @@ def display_middle_success():
     
     st.markdown("""
     <div style="text-align: center; margin: 20px 0;">
-    「ちぃぃっ……まさか第一関門をクリアするとは……まだ第二関門が待っているぞ！」
+    「ふん！基本的な学力や知識はあるようやね……だが第二関門が待っているぞ！」
     </div>
     """, unsafe_allow_html=True)
     
@@ -563,7 +563,7 @@ def display_quiz_intro():
         st.markdown("""
             <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
                 <h2 class="title-container" style="font-size: 1.5rem; margin: 0; padding: 0;">
-                    <div class="subtitle">なんね、あんたら？元の附設にもどしたい？<br>そんならおいの質問に答えてみんね？<br>卒業生なら、簡単に答えられるやろう</div>
+                    <div class="subtitle">なんね、あんたら？元の附設にもどしたい？<br>あんたら本当に卒業生かね？<br>ちょっと試させてもらおう</div>
                 </h2>
             </div>
         """, unsafe_allow_html=True)
@@ -574,7 +574,7 @@ def display_quiz_intro():
 
 def display_quiz():
     """クイズ画面を表示（quiz1）"""
-    st.markdown(f"<h1 style='text-align: center;'>黒水校長の質問をクリアせよ！第一関門</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align: center;'>高校1年生の問題をクリアせよ！第一関門</h1>", unsafe_allow_html=True)
     st.markdown("""
 <style>
 .center-text {
@@ -613,7 +613,7 @@ def display_quiz():
 
 def display_quiz2():
     """クイズ画面を表示（quiz2）"""
-    st.markdown(f"<h1 style='text-align: center;'>黒水校長の質問をクリアせよ！第二関門</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align: center;'>附設に関する質問をクリアせよ！第二関門</h1>", unsafe_allow_html=True)
     st.markdown("""
 <style>
 .center-text {

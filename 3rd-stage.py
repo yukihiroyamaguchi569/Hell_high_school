@@ -602,7 +602,7 @@ def main():
     elif st.session_state.game_state == 'success':
         display_success()
     
-    st.markdown('</div>', unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main() 

@@ -408,12 +408,6 @@ def load_css():
             border: none !important;
             box-shadow: none !important;
         }
-        
-        /* メインコンテンツエリアのパディング調整 */
-        .main-content {
-            padding-bottom: 80px;
-            background-color: #212121 !important;
-        }
 
         /* Streamlitデフォルトの余白を調整 */
         .stMarkdown {
@@ -736,8 +730,6 @@ def main():
                 st.session_state.tts_enabled = tts_enabled
                 st.rerun()
     
-    # メインコンテンツエリア
-    st.markdown('<div class="main-content">', unsafe_allow_html=True)
     
     # ゲーム状態に応じて画面を表示
     if st.session_state.game_state == 'title':

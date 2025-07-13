@@ -562,19 +562,30 @@ def display_title():
     st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
 
 def display_opening():
-    # カラムの比率を変更して中央の列をより大きく
-    col1, col2, col3 = st.columns([1, 3, 1])
-    with col2:
+    # 2カラムレイアウトを作成（左側に画像、右側にフォーム）
+    col1, col2 = st.columns([1, 1])
+    
+    # 左側のカラムに画像を表示
+    with col1:
         st.image("src/images/manager-room-door.png", use_container_width=True)
     
-    st.markdown("<h2 style='text-align: center;'>暗証番号を入力せよ</h2>", unsafe_allow_html=True)
-    
-    # 暗証番号入力（中央揃え、4桁用の幅）
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # 右側のカラムに暗証番号入力フォームを表示（垂直方向の中央に配置）
     with col2:
+        
+        # 空白を入れて上部に余白を作成
+        st.markdown("<div style='margin-top: 30%;'></div>", unsafe_allow_html=True)
+
+        # 垂直方向の中央揃えのためのCSSとHTMLを使用
+        st.markdown("""
+            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
+                <h2 style="margin-bottom: 20px;">暗証番号を入力せよ</h2>
+            </div>
+        """, unsafe_allow_html=True)
+
+
         pin_code = st.text_input("暗証番号", type="password", placeholder="６桁の数字", max_chars=6, key="pin_input", label_visibility="collapsed")
         
-        # 入力値が4桁になったら自動チェック
+        # 入力値が6桁になったら自動チェック
         if pin_code and len(pin_code) == 6:
             if pin_code == "442222":
                 # ドアが開く音を再生
@@ -611,8 +622,6 @@ def display_opening():
                 st.rerun()
             else:
                 st.error("暗証番号が間違っているようだ")
-    
-    col1, col2, col3 = st.columns([1, 1, 1])
 
     st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
 

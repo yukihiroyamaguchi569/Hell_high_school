@@ -18,10 +18,10 @@ client = OpenAI(api_key=get_openai_api_key())
 # 画像のパスを設定
 AVATAR_PATH = Path("src/images/opening.png")
 
-def load_prompt_from_file():
+def load_prompt_from_file(file_path):
     """プロンプトをファイルから読み込む"""
     try:
-        with open("prompt.txt", "r", encoding="utf-8") as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             prompt_content = f.read()
         return prompt_content
     except Exception as e:
@@ -36,7 +36,7 @@ def init_session_state():
         st.session_state.messages = []
     if 'openai_messages' not in st.session_state:
         # プロンプトをファイルから読み込む
-        prompt_content = load_prompt_from_file()
+        prompt_content = load_prompt_from_file("prompt.txt")
         if prompt_content:
             st.session_state.openai_messages = [
                 {"role": "system", "content": prompt_content}
@@ -54,8 +54,14 @@ def init_session_state():
             st.session_state.avatar_image = None
     if 'tts_enabled' not in st.session_state:
         st.session_state.tts_enabled = True
+    if 'quiz1_completed' not in st.session_state:
+        st.session_state.quiz1_completed = False
+    if 'quiz2_completed' not in st.session_state:
+        st.session_state.quiz2_completed = False
     if 'quiz_completed' not in st.session_state:
         st.session_state.quiz_completed = False
+    if 'current_quiz' not in st.session_state:
+        st.session_state.current_quiz = 'quiz1'
 
 def apply_pronunciation_guides(text):
     """読み方が難しい言葉にふりがなや読み方のヒントを付ける"""
@@ -404,6 +410,14 @@ def handle_submit():
                 "role": "assistant",
                 "content": ai_response
             })
+            
+            # 最後のメッセージが成功メッセージかチェック
+            if st.session_state.current_quiz == 'quiz1' and "これでクイズ1は終了だ" in ai_response:
+                st.session_state.quiz1_completed = True
+                st.session_state.game_state = 'middle_success'
+            elif st.session_state.current_quiz == 'quiz2' and "全問正解かい" in ai_response:
+                st.session_state.quiz2_completed = True
+                st.session_state.game_state = 'final_success'
         
         st.session_state["user_input_field"] = ""
 
@@ -489,18 +503,49 @@ def display_opening():
 
     st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
 
-def display_success():
+def display_middle_success():
+    """quiz1クリア後の中間成功画面を表示"""
+    # カラムの比率を変更して中央の列をより大きく
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col2:
+        st.image("src/images/school-gate.png", use_container_width=True)
+    
+    st.markdown("""
+    <div style="text-align: center; margin: 20px 0;">
+    「ちぃぃっ……まさか第一関門をクリアするとは……まだ第二関門が待っているぞ！」
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 次に進むボタン（中央揃え）
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("次に進む", key="next_quiz_button"):
+            # quiz2のプロンプトを読み込む
+            prompt_content = load_prompt_from_file("prompt2.txt")
+            if prompt_content:
+                # メッセージをリセットして新しいプロンプトを設定
+                st.session_state.messages = []
+                st.session_state.openai_messages = [
+                    {"role": "system", "content": prompt_content}
+                ]
+                st.session_state.current_quiz = 'quiz2'
+                st.session_state.game_state = 'quiz2'
+                st.rerun()
+            else:
+                st.error("prompt2.txtファイルが見つからないか、読み込めませんでした。")
+
+def display_final_success():
+    """quiz2クリア後の最終成功画面を表示"""
     # カラムの比率を変更して中央の列をより大きく
     col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
         st.image("src/images/anger-kuromizu.png", use_container_width=True)
     
     st.markdown("""
-    
-    「ちぃぃっ……まさか全問正解するとは……
-
-    """)
-    
+    <div style="text-align: center; margin: 20px 0;">
+    「ちぃぃっ……まさか全問正解するとは……」
+    </div>
+    """, unsafe_allow_html=True)
 
 def display_quiz_intro():
     """クイズ開始前のイントロ画面を表示"""
@@ -528,7 +573,8 @@ def display_quiz_intro():
             st.rerun()
 
 def display_quiz():
-    st.markdown("<h1 style='text-align: center;'>黒水校長の質問をクリアせよ！</h1>", unsafe_allow_html=True)
+    """クイズ画面を表示（quiz1）"""
+    st.markdown(f"<h1 style='text-align: center;'>黒水校長の質問をクリアせよ！第一関門</h1>", unsafe_allow_html=True)
     st.markdown("""
 <style>
 .center-text {
@@ -549,12 +595,45 @@ def display_quiz():
     if st.session_state.messages:
         latest_msg = st.session_state.messages[-1]
         format_message(latest_msg['role'], latest_msg['content'], chat_area, is_new_message=True)
-        
-        # 最後のメッセージが成功メッセージかチェック
-        if "全問正解かい" in latest_msg['content'] and not st.session_state.quiz_completed:
-            st.session_state.quiz_completed = True
-            st.session_state.game_state = 'success'
-            st.rerun()
+    
+    # 入力フィールド（固定位置）
+    st.markdown("""
+        <div class="input-container">
+            <div style="max-width: 1000px; margin: 0 auto;">
+    """, unsafe_allow_html=True)
+    
+    st.text_input(
+        "あなたの回答を入力してください",
+        key="user_input_field",
+        on_change=handle_submit,
+        label_visibility="collapsed"
+    )
+    
+    st.markdown('</div></div>', unsafe_allow_html=True)
+
+def display_quiz2():
+    """クイズ画面を表示（quiz2）"""
+    st.markdown(f"<h1 style='text-align: center;'>黒水校長の質問をクリアせよ！第二関門</h1>", unsafe_allow_html=True)
+    st.markdown("""
+<style>
+.center-text {
+    text-align: center;
+}
+</style>
+""", unsafe_allow_html=True)
+    st.markdown('<p class="center-text">元の附設に戻せ！と入力してスタートせよ</p>', unsafe_allow_html=True)
+    
+    # チャットメッセージの表示エリア
+    chat_area = st.container()
+    
+    # 過去のメッセージを表示（TTSなし）
+    for i, msg in enumerate(st.session_state.messages[:-1] if st.session_state.messages else []):
+        format_message(msg['role'], msg['content'], chat_area, is_new_message=False)
+    
+    # 最新のメッセージのみTTS処理を行う
+    if st.session_state.messages:
+        latest_msg = st.session_state.messages[-1]
+        format_message(latest_msg['role'], latest_msg['content'], chat_area, is_new_message=True)
     
     # 入力フィールド（固定位置）
     st.markdown("""
@@ -593,14 +672,13 @@ def main():
     st.markdown(load_css(), unsafe_allow_html=True)
     
     # TTS設定のトグルボタン（クイズ画面でのみ表示）
-    if st.session_state.game_state == 'quiz':
+    if st.session_state.game_state == 'quiz' or st.session_state.game_state == 'quiz2':
         with st.sidebar:
             st.markdown("### 音声設定")
             tts_enabled = st.toggle("音声読み上げ", value=st.session_state.tts_enabled)
             if tts_enabled != st.session_state.tts_enabled:
                 st.session_state.tts_enabled = tts_enabled
                 st.rerun()
-    
     
     # ゲーム状態に応じて画面を表示
     if st.session_state.game_state == 'title':
@@ -611,10 +689,12 @@ def main():
         display_quiz_intro()
     elif st.session_state.game_state == 'quiz':
         display_quiz()
-    elif st.session_state.game_state == 'success':
-        display_success()
-    
-
+    elif st.session_state.game_state == 'middle_success':
+        display_middle_success()
+    elif st.session_state.game_state == 'quiz2':
+        display_quiz2()
+    elif st.session_state.game_state == 'final_success':
+        display_final_success()
 
 if __name__ == "__main__":
     main() 

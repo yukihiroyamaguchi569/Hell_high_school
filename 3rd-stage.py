@@ -284,6 +284,7 @@ def load_css():
             margin: 0 auto;
             padding: 0.5rem 2rem;
             font-size: 1.2rem;
+            width: 200px;
         }
         /* 画像コンテナのスタイル */
         .block-container {

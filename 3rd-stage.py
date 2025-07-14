@@ -5,6 +5,9 @@ import base64
 import os
 import time
 
+# Google Cloud Text-to-Speech APIのインポート
+from google.cloud import texttospeech
+
 # OpenAI APIキーを環境変数から取得（Render.com用）
 def get_openai_api_key():
     api_key = os.getenv("OPENAI_API_KEY")
@@ -62,6 +65,8 @@ def init_session_state():
         st.session_state.quiz_completed = False
     if 'current_quiz' not in st.session_state:
         st.session_state.current_quiz = 'quiz1'
+    if 'tts_provider' not in st.session_state:
+        st.session_state.tts_provider = "openai"  # デフォルトはOpenAI
 
 def apply_pronunciation_guides(text):
     """読み方が難しい言葉にふりがなや読み方のヒントを付ける"""
@@ -131,6 +136,47 @@ def generate_speech(text):
         return response.content
     except Exception as e:
         st.error(f"音声生成エラー: {str(e)}")
+        return None
+
+# 既存のOpenAI TTS関数の下にGoogle TTSの関数を追加
+def generate_speech_google(text):
+    """Generate speech from text using Google Cloud TTS"""
+    try:
+        # 読み方ガイドを適用
+        modified_text = apply_pronunciation_guides(text)
+        
+        # 認証情報ファイルへのパスを絶対パスで設定
+        # __file__を使わず、明示的に絶対パスを指定
+        credentials_path = "/Users/Yukis_MacBook/Python/Hell-high-school/src/credentials/hell-highschool-40eb2d572293.json"
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
+        
+        # Google Cloud Text-to-Speech クライアントを初期化
+        tts_client = texttospeech.TextToSpeechClient()
+        
+        # 合成する入力テキストを設定
+        synthesis_input = texttospeech.SynthesisInput(text=modified_text)
+        
+        # 音声設定（日本語、女性の声）
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="ja-JP",
+            name="ja-JP-Wavenet-B",  # 女性の声
+            ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
+        )
+        
+        # 音声ファイルの設定（MP3形式）
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.MP3
+        )
+        
+        # リクエストを送信
+        response = tts_client.synthesize_speech(
+            input=synthesis_input, voice=voice, audio_config=audio_config
+        )
+        
+        # 音声データを返す
+        return response.audio_content
+    except Exception as e:
+        st.error(f"Google音声生成エラー: {str(e)}")
         return None
 
 def load_css():
@@ -368,7 +414,12 @@ def format_message(role, content, container, is_new_message=False):
         
         # TTSが有効で、新しいメッセージの場合のみ音声を先に生成・再生
         if st.session_state.tts_enabled and is_new_message:
-            audio_bytes = generate_speech(speech_text)  # ひらがな変換したテキストを使用
+            # 選択されたプロバイダーに基づいて音声を生成
+            if st.session_state.tts_provider == "openai":
+                audio_bytes = generate_speech(speech_text)
+            else:  # google
+                audio_bytes = generate_speech_google(speech_text)
+                
             if audio_bytes:
                 # Base64エンコードしてHTMLに埋め込み
                 audio_b64 = base64.b64encode(audio_bytes).decode()
@@ -678,8 +729,17 @@ def main():
         with st.sidebar:
             st.markdown("### 音声設定")
             tts_enabled = st.toggle("音声読み上げ", value=st.session_state.tts_enabled)
-            if tts_enabled != st.session_state.tts_enabled:
+            
+            # TTSプロバイダー選択を追加
+            tts_provider = st.radio(
+                "音声プロバイダー",
+                options=["openai", "google"],
+                index=0 if st.session_state.tts_provider == "openai" else 1
+            )
+            
+            if tts_enabled != st.session_state.tts_enabled or tts_provider != st.session_state.tts_provider:
                 st.session_state.tts_enabled = tts_enabled
+                st.session_state.tts_provider = tts_provider
                 st.rerun()
     
     # ゲーム状態に応じて画面を表示

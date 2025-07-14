@@ -111,6 +111,8 @@ def apply_pronunciation_guides(text):
         "織田信長":"おだのぶなが",
         "町田": "まちだ",
         "情け": "なさけ",
+        "三権分立":"さんけんぶんりつ",
+        "県花":"けんか",
     }
     
     # 辞書内の各項目に対して読み方を追加
@@ -488,7 +490,56 @@ def display_title():
             st.session_state.game_state = 'opening'
             st.rerun()
     
+    # 隠しジャンプボタン（背景と同じ色）
     col1, col2, col3 = st.columns([1, 1, 1])
+    with col3:
+        st.markdown("""
+        <style>
+        .hidden-button {
+            background-color: #212121;
+            color: #212121;
+            border: none;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
+        .hidden-button:hover {
+            background-color: #2a2a2a;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # 隠しボタン（HTMLを使用して背景色と同じ色にする）
+        st.markdown("""
+        <button class="hidden-button" id="quiz2-jump" onclick="
+            window.parent.postMessage({
+                type: 'streamlit:setComponentValue',
+                value: true,
+                key: 'jump_to_quiz2'
+            }, '*');
+        "></button>
+        """, unsafe_allow_html=True)
+        
+        # ボタンの状態を受け取るための仕組み
+        jump_clicked = st.checkbox("", key="jump_to_quiz2", value=False, label_visibility="collapsed")
+        if jump_clicked:
+            # クイズ2のプロンプトを読み込む
+            prompt_content = load_prompt_from_file("prompt2.txt")
+            if prompt_content:
+                # メッセージをリセットして新しいプロンプトを設定
+                st.session_state.messages = []
+                st.session_state.openai_messages = [
+                    {"role": "system", "content": prompt_content}
+                ]
+                st.session_state.current_quiz = 'quiz2'
+                st.session_state.game_state = 'quiz2'
+                st.session_state.quiz1_completed = True  # クイズ1をクリアした状態にする
+                st.rerun()
+            else:
+                st.error("prompt2.txtファイルが見つからないか、読み込めませんでした。")
 
     st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
 
@@ -565,7 +616,7 @@ def display_middle_success():
     
     st.markdown("""
     <div style="text-align: center; margin: 20px 0;">
-    「ふん！基本的な学力や知識はあるようやね……だが第二関門が待っているぞ！」
+    「ふん！基本的な学力や知識はあるようやね……だが第二関門が待っとるぞ！」
     </div>
     """, unsafe_allow_html=True)
     
@@ -592,13 +643,14 @@ def display_final_success():
     # カラムの比率を変更して中央の列をより大きく
     col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
+        st.markdown("""
+        <div style="text-align: center; margin: 20px 0;">
+        「ちぃぃっ……まさか全問正解するとは……」
+        </div>
+        """, unsafe_allow_html=True)
+
         st.image("src/images/anger-kuromizu.png", use_container_width=True)
     
-    st.markdown("""
-    <div style="text-align: center; margin: 20px 0;">
-    「ちぃぃっ……まさか全問正解するとは……」
-    </div>
-    """, unsafe_allow_html=True)
 
 def display_quiz_intro():
     """クイズ開始前のイントロ画面を表示"""
@@ -674,7 +726,7 @@ def display_quiz2():
 }
 </style>
 """, unsafe_allow_html=True)
-    st.markdown('<p class="center-text">なんでも聞いてみろ！と入力してスタートせよ</p>', unsafe_allow_html=True)
+    ## st.markdown('<p class="center-text">なんでも聞いてみろ！と入力してスタートせよ</p>', unsafe_allow_html=True)
     
     # チャットメッセージの表示エリア
     chat_area = st.container()

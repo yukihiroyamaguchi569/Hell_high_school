@@ -102,8 +102,10 @@ def apply_pronunciation_guides(text):
         "松浦":"まつうら",
         "田中":"たなか",
         "吉開":"よしかい",
-        "年": "ねん"
-        
+        "年": "ねん",
+        "織田信長":"おだのぶなが",
+        "町田": "まちだ",
+        "情け": "なさけ",
     }
     
     # 辞書内の各項目に対して読み方を追加
@@ -574,7 +576,7 @@ def display_quiz_intro():
 
 def display_quiz():
     """クイズ画面を表示（quiz1）"""
-    st.markdown(f"<h1 style='text-align: center;'>高校1年生の問題をクリアせよ！第一関門</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align: center;'>基本問題をクリアせよ！</h1>", unsafe_allow_html=True)
     st.markdown("""
 <style>
 .center-text {
@@ -582,7 +584,7 @@ def display_quiz():
 }
 </style>
 """, unsafe_allow_html=True)
-    st.markdown('<p class="center-text">元の附設に戻せ！と入力してスタートせよ</p>', unsafe_allow_html=True)
+    st.markdown('<p class="center-text">元の高校に戻せ！と入力してスタートせよ</p>', unsafe_allow_html=True)
     
     # チャットメッセージの表示エリア
     chat_area = st.container()
@@ -613,7 +615,7 @@ def display_quiz():
 
 def display_quiz2():
     """クイズ画面を表示（quiz2）"""
-    st.markdown(f"<h1 style='text-align: center;'>附設に関する質問をクリアせよ！第二関門</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align: center;'>附設に関する質問をクリアせよ！</h1>", unsafe_allow_html=True)
     st.markdown("""
 <style>
 .center-text {
@@ -621,7 +623,7 @@ def display_quiz2():
 }
 </style>
 """, unsafe_allow_html=True)
-    st.markdown('<p class="center-text">元の附設に戻せ！と入力してスタートせよ</p>', unsafe_allow_html=True)
+    st.markdown('<p class="center-text">なんでも聞いてみろ！と入力してスタートせよ</p>', unsafe_allow_html=True)
     
     # チャットメッセージの表示エリア
     chat_area = st.container()

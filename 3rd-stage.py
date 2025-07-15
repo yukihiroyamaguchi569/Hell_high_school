@@ -618,6 +618,39 @@ def display_opening():
         # 入力値が6桁になったら自動チェック
         if pin_code and len(pin_code) == 6:
             if pin_code == "442222":
+
+                st.session_state.game_state = 'opening2'
+                st.rerun()
+            else:
+                st.error("暗証番号が間違っているようだ")
+
+def display_opening2():
+    # 2カラムレイアウトを作成（左側に画像、右側にフォーム）
+    col1, col2 = st.columns([1, 1])
+    
+    # 左側のカラムに画像を表示
+    with col1:
+        st.image("src/images/manager-room-door-open.png", use_container_width=True)
+    
+    # 右側のカラムに暗証番号入力フォームを表示（垂直方向の中央に配置）
+    with col2:
+        
+        # 空白を入れて上部に余白を作成
+        st.markdown("<div style='margin-top: 30%;'></div>", unsafe_allow_html=True)
+
+        # 垂直方向の中央揃えのためのCSSとHTMLを使用
+        st.markdown("""
+            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
+                <h2 style="margin-bottom: 20px;">暗証番号を入力せよ</h2>
+            </div>
+        """, unsafe_allow_html=True)
+
+
+        pin_code = st.text_input("暗証番号", type="password", placeholder="６桁の数字", max_chars=6, key="pin_input", label_visibility="collapsed")
+        
+        # 入力値が6桁になったら自動チェック
+        if pin_code and len(pin_code) == 6:
+            if pin_code == "442222":
                 # ドアが開く音を再生
                 try:
                     with open("src/audio/door-open.mp3", "rb") as f:
@@ -652,8 +685,6 @@ def display_opening():
                 st.rerun()
             else:
                 st.error("暗証番号が間違っているようだ")
-
-    st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
 
 def display_middle_success():
     """quiz1クリア後の中間成功画面を表示"""
@@ -919,6 +950,8 @@ def main():
         display_title()
     elif st.session_state.game_state == 'opening':
         display_opening()
+    elif st.session_state.game_state == 'opening2':
+        display_opening2()
     elif st.session_state.game_state == 'quiz_intro':
         display_quiz_intro()
     elif st.session_state.game_state == 'quiz':

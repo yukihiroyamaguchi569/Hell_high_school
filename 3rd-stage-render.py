@@ -538,6 +538,11 @@ def display_opening():
                 except FileNotFoundError:
                     st.warning("音声ファイルが見つかりません: src/audio/door-open.mp3")
                 
+                # 開いたドアの画像を表示
+                col1, col2, col3 = st.columns([1, 3, 1])
+                with col2:
+                    st.image("src/images/manager-room-empty.png", use_container_width=True)
+                
                 st.success("鍵が開いた・・")
                 # 音が再生されるまで少し待機
                 time.sleep(2)
@@ -597,7 +602,7 @@ def display_quiz_intro():
     # より均等な配置のためのcolumns設定
     col1, col2, col3 = st.columns([1, 2, 1])  # 比率を[1, 2, 1]に変更してより中央に寄せる
     with col2:
-        st.image("src/images/principals-office.png", width=1200)
+        st.image("src/images/manager-room-empty.png", width=1200)
  
     st.markdown("""
         <div style="background-color: #212121;">

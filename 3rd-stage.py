@@ -419,7 +419,7 @@ def get_chat_response(messages):
                     gemini_messages.append({"role": "user" if msg["role"] == "user" else "model", "parts": [msg["content"]]})
             
             # Geminiモデルを設定
-            model = genai.GenerativeModel('gemini-1.5-pro')
+            model = genai.GenerativeModel('gemini-2.5-flash')
             
             # チャット履歴を作成
             chat = model.start_chat(history=gemini_messages)

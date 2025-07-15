@@ -698,10 +698,10 @@ def display_final_success():
         """, unsafe_allow_html=True)
 
         st.image("src/images/anger-kuromizu.png", use_container_width=True)
-    
-    with col3:
 
-        # '次へ'ボタンを追加
+    with col3:
+    # ボタンの上にマージンを追加
+        st.markdown("<div style='margin-top: 100%;'></div>", unsafe_allow_html=True)
         if st.button("次へ", key="next_button"):
             st.session_state.game_state = 'ending'
             st.rerun()

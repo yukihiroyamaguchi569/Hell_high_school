@@ -646,45 +646,39 @@ def display_opening2():
         """, unsafe_allow_html=True)
 
 
-        pin_code = st.text_input("暗証番号", type="password", placeholder="６桁の数字", max_chars=6, key="pin_input", label_visibility="collapsed")
+    # ドアが開く音を再生
+    try:
+        with open("src/audio/door-open.mp3", "rb") as f:
+            audio_bytes = f.read()
         
-        # 入力値が6桁になったら自動チェック
-        if pin_code and len(pin_code) == 6:
-            if pin_code == "442222":
-                # ドアが開く音を再生
-                try:
-                    with open("src/audio/door-open.mp3", "rb") as f:
-                        audio_bytes = f.read()
-                    
-                    # Base64エンコードしてHTMLに埋め込み
-                    audio_b64 = base64.b64encode(audio_bytes).decode()
-                    
-                    st.markdown(f"""
-                    <audio autoplay style="display: none;">
-                        <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
-                    </audio>
-                    <script>
-                        // 音声再生を確実にするためのJavaScript
-                        document.addEventListener('DOMContentLoaded', function() {{
-                            const audio = document.querySelector('audio[autoplay]');
-                            if (audio) {{
-                                audio.play().catch(function(error) {{
-                                    console.log('音声再生に失敗しました:', error);
-                                }});
-                            }}
-                        }});
-                    </script>
-                    """, unsafe_allow_html=True)
-                except FileNotFoundError:
-                    st.warning("音声ファイルが見つかりません: src/audio/door-open.mp3")
-                
-                st.success("鍵が開いた・・")
-                # 音が再生されるまで少し待機
-                time.sleep(2)
-                st.session_state.game_state = 'quiz_intro'
-                st.rerun()
-            else:
-                st.error("暗証番号が間違っているようだ")
+        # Base64エンコードしてHTMLに埋め込み
+        audio_b64 = base64.b64encode(audio_bytes).decode()
+        
+        st.markdown(f"""
+        <audio autoplay style="display: none;">
+            <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
+        </audio>
+        <script>
+            // 音声再生を確実にするためのJavaScript
+            document.addEventListener('DOMContentLoaded', function() {{
+                const audio = document.querySelector('audio[autoplay]');
+                if (audio) {{
+                    audio.play().catch(function(error) {{
+                        console.log('音声再生に失敗しました:', error);
+                    }});
+                }}
+            }});
+        </script>
+        """, unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.warning("音声ファイルが見つかりません: src/audio/door-open.mp3")
+    
+    #st.success("鍵が開いた・・")
+    # 音が再生されるまで少し待機
+    time.sleep(2)
+    st.session_state.game_state = 'quiz_intro'
+    st.rerun()
+
 
 def display_middle_success():
     """quiz1クリア後の中間成功画面を表示"""

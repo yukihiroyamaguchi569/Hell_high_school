@@ -518,7 +518,7 @@ def handle_submit():
             if st.session_state.current_quiz == 'quiz1' and "これでクイズ1は終了だ" in ai_response:
                 st.session_state.quiz1_completed = True
                 st.session_state.game_state = 'middle_success'
-            elif st.session_state.current_quiz == 'quiz2' and "まじか！全問正解かい" in ai_response and len(st.session_state.messages) > 3:
+            elif st.session_state.current_quiz == 'quiz2' and "まじか！全問正解かい！" in ai_response and len(st.session_state.messages) > 3:
                 st.session_state.quiz2_completed = True
                 st.session_state.game_state = 'final_success'
         
@@ -700,9 +700,37 @@ def display_final_success():
         st.image("src/images/anger-kuromizu.png", use_container_width=True)
 
     with col3:
-    # ボタンの上にマージンを追加
+        # ボタンの上にマージンを追加
         st.markdown("<div style='margin-top: 100%;'></div>", unsafe_allow_html=True)
         if st.button("次へ", key="next_button"):
+            # ドアが開く音を再生
+            try:
+                with open("src/audio/door-open.mp3", "rb") as f:
+                    audio_bytes = f.read()
+                
+                # Base64エンコードしてHTMLに埋め込み
+                audio_b64 = base64.b64encode(audio_bytes).decode()
+                
+                st.markdown(f"""
+                <audio autoplay style="display: none;">
+                    <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
+                </audio>
+                <script>
+                    // 音声再生を確実にするためのJavaScript
+                    document.addEventListener('DOMContentLoaded', function() {{
+                        const audio = document.querySelector('audio[autoplay]');
+                        if (audio) {{
+                            audio.play().catch(function(error) {{
+                                console.log('音声再生に失敗しました:', error);
+                            }});
+                        }}
+                    }});
+                </script>
+                """, unsafe_allow_html=True)
+            except FileNotFoundError:
+                st.warning("音声ファイルが見つかりません: src/audio/door-open.mp3")
+            
+            time.sleep(2.0)
             st.session_state.game_state = 'ending'
             st.rerun()
 

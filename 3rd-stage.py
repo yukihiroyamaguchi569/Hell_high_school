@@ -775,6 +775,9 @@ def display_quiz():
     )
     
     st.markdown('</div></div>', unsafe_allow_html=True)
+    
+    # 画面下部に余白を追加して、チャットが上に表示されるようにする
+    st.markdown("<div style='height: 300px;'></div>", unsafe_allow_html=True)
 
 def display_quiz2():
     """クイズ画面を表示（quiz2）"""
@@ -826,6 +829,9 @@ def display_quiz2():
     )
     
     st.markdown('</div></div>', unsafe_allow_html=True)
+    
+    # 画面下部に余白を追加して、チャットが上に表示されるようにする
+    st.markdown("<div style='height: 300px;'></div>", unsafe_allow_html=True)
 
 def main():
     st.set_page_config(

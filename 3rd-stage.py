@@ -875,8 +875,6 @@ def display_ending():
     with col2:
         st.image("src/images/manager-room-empty.png", use_container_width=True)
 
-    st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
-
 def main():
     st.set_page_config(
         page_title="漆黒の遥藍地",

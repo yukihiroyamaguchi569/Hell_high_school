@@ -409,9 +409,9 @@ def get_chat_response(messages):
                 st.error("Gemini APIキーが設定されていません。")
                 return None
             
-            # Gemini用にメッセージをフォーマット
+            # Gemini用にメッセージをフォーマット（最後のメッセージを除く）
             gemini_messages = []
-            for msg in messages:
+            for msg in messages[:-1]:  # 最後のメッセージを除外
                 if msg["role"] == "system":
                     # Geminiはシステムロールをサポートしていないため、ユーザーメッセージとして扱う
                     gemini_messages.append({"role": "user", "parts": [msg["content"]]})
@@ -424,8 +424,9 @@ def get_chat_response(messages):
             # チャット履歴を作成
             chat = model.start_chat(history=gemini_messages)
             
-            # レスポンスを取得
-            response = chat.send_message(messages[-1]["content"] if messages[-1]["role"] == "user" else "続けてください")
+            # 最後のメッセージを送信
+            last_message = messages[-1]
+            response = chat.send_message(last_message["content"])
             return response.text
     except Exception as e:
         st.error(f"エラーが発生しました: {str(e)}")
@@ -518,7 +519,7 @@ def handle_submit():
             if st.session_state.current_quiz == 'quiz1' and "これでクイズ1は終了だ" in ai_response:
                 st.session_state.quiz1_completed = True
                 st.session_state.game_state = 'middle_success'
-            elif st.session_state.current_quiz == 'quiz2' and "まじか！全問正解かい！" in ai_response and len(st.session_state.messages) > 3:
+            elif st.session_state.current_quiz == 'quiz2' and "これでクイズ2は終了だ" in ai_response and len(st.session_state.messages) > 3:
                 st.session_state.quiz2_completed = True
                 st.session_state.game_state = 'final_success'
         

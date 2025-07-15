@@ -699,6 +699,13 @@ def display_final_success():
 
         st.image("src/images/anger-kuromizu.png", use_container_width=True)
     
+    with col3:
+
+        # '次へ'ボタンを追加
+        if st.button("次へ", key="next_button"):
+            st.session_state.game_state = 'ending'
+            st.rerun()
+
 
 def display_quiz_intro():
     """クイズ開始前のイントロ画面を表示"""
@@ -833,6 +840,15 @@ def display_quiz2():
     # 画面下部に余白を追加して、チャットが上に表示されるようにする
     st.markdown("<div style='height: 300px;'></div>", unsafe_allow_html=True)
 
+def display_ending():
+    """エンディング画面を表示"""
+    # カラムの比率を変更して中央の列をより大きく
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col2:
+        st.image("src/images/manager-room-empty.png", use_container_width=True)
+
+    st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
+
 def main():
     st.set_page_config(
         page_title="漆黒の遥藍地",
@@ -887,6 +903,8 @@ def main():
         display_quiz2()
     elif st.session_state.game_state == 'final_success':
         display_final_success()
+    elif st.session_state.game_state == 'ending':
+        display_ending()
 
 if __name__ == "__main__":
     main() 

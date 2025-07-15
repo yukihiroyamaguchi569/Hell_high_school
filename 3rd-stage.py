@@ -4,6 +4,7 @@ from pathlib import Path
 import base64
 import os
 import time
+import google.generativeai as genai  # Gemini APIのインポート
 
 # OpenAI APIキーを環境変数から取得（Render.com用）
 def get_openai_api_key():
@@ -13,7 +14,26 @@ def get_openai_api_key():
         st.stop()
     return api_key
 
+# Gemini APIキーをファイルから取得
+def get_gemini_api_key():
+    try:
+        with open("src/credentials/gemini-api-key.txt", "r") as f:
+            api_key = f.read().strip()
+        if not api_key:
+            st.error("Gemini APIキーが設定されていません。src/credentials/gemini-api-key.txtを確認してください。")
+            return None
+        return api_key
+    except Exception as e:
+        st.error(f"Gemini APIキーの読み込みエラー: {str(e)}")
+        return None
+
+# OpenAIクライアントの初期化
 client = OpenAI(api_key=get_openai_api_key())
+
+# Gemini APIの初期化
+gemini_api_key = get_gemini_api_key()
+if gemini_api_key:
+    genai.configure(api_key=gemini_api_key)
 
 # 画像のパスを設定
 AVATAR_PATH = Path("src/images/opening.png")
@@ -62,6 +82,8 @@ def init_session_state():
         st.session_state.quiz_completed = False
     if 'current_quiz' not in st.session_state:
         st.session_state.current_quiz = 'quiz1'
+    if 'model_choice' not in st.session_state:
+        st.session_state.model_choice = 'gpt-4o'  # デフォルトはGPT-4o
 
 def apply_pronunciation_guides(text):
     """読み方が難しい言葉にふりがなや読み方のヒントを付ける"""
@@ -322,15 +344,41 @@ def load_css():
     """
 
 def get_chat_response(messages):
-    """Get response from OpenAI API"""
+    """Get response from OpenAI API or Gemini API based on model choice"""
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=messages,
-            temperature=0.7,
-            max_tokens=1000
-        )
-        return response.choices[0].message.content
+        if st.session_state.model_choice == 'gpt-4o':
+            # OpenAI APIを使用
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages,
+                temperature=0.7,
+                max_tokens=1000
+            )
+            return response.choices[0].message.content
+        elif st.session_state.model_choice == 'gemini':
+            # Gemini APIを使用
+            if not gemini_api_key:
+                st.error("Gemini APIキーが設定されていません。")
+                return None
+            
+            # Gemini用にメッセージをフォーマット
+            gemini_messages = []
+            for msg in messages:
+                if msg["role"] == "system":
+                    # Geminiはシステムロールをサポートしていないため、ユーザーメッセージとして扱う
+                    gemini_messages.append({"role": "user", "parts": [msg["content"]]})
+                else:
+                    gemini_messages.append({"role": "user" if msg["role"] == "user" else "model", "parts": [msg["content"]]})
+            
+            # Geminiモデルを設定
+            model = genai.GenerativeModel('gemini-1.5-pro')
+            
+            # チャット履歴を作成
+            chat = model.start_chat(history=gemini_messages)
+            
+            # レスポンスを取得
+            response = chat.send_message(messages[-1]["content"] if messages[-1]["role"] == "user" else "続けてください")
+            return response.text
     except Exception as e:
         st.error(f"エラーが発生しました: {str(e)}")
         return None
@@ -586,6 +634,18 @@ def display_quiz():
 """, unsafe_allow_html=True)
     st.markdown('<p class="center-text">元の高校に戻せ！と入力してスタートせよ</p>', unsafe_allow_html=True)
     
+    # モデル選択（サイドバーに移動）
+    with st.sidebar:
+        st.markdown("### モデル設定")
+        model_choice = st.radio(
+            "使用するAIモデル",
+            ["gpt-4o", "gemini"],
+            index=0 if st.session_state.model_choice == "gpt-4o" else 1
+        )
+        if model_choice != st.session_state.model_choice:
+            st.session_state.model_choice = model_choice
+            st.rerun()
+    
     # チャットメッセージの表示エリア
     chat_area = st.container()
     
@@ -624,6 +684,18 @@ def display_quiz2():
 </style>
 """, unsafe_allow_html=True)
     st.markdown('<p class="center-text">なんでも聞いてみろ！と入力してスタートせよ</p>', unsafe_allow_html=True)
+    
+    # モデル選択（サイドバーに移動）
+    with st.sidebar:
+        st.markdown("### モデル設定")
+        model_choice = st.radio(
+            "使用するAIモデル",
+            ["gpt-4o", "gemini"],
+            index=0 if st.session_state.model_choice == "gpt-4o" else 1
+        )
+        if model_choice != st.session_state.model_choice:
+            st.session_state.model_choice = model_choice
+            st.rerun()
     
     # チャットメッセージの表示エリア
     chat_area = st.container()

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漆黒の遥藍地</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- タイトル画面 -->
+        <div id="title-screen" class="screen">
+            <div class="title-container">
+                <img src="src/images/title.png" alt="タイトル" class="title-image">
+                <button id="game-start-button" class="button">ゲームスタート</button>
+            </div>
+            <div class="hidden-button-container">
+                <button id="jump-to-quiz2" class="hidden-button"></button>
+            </div>
+            <p class="footer">Built with JavaScript</p>
+        </div>
+
+        <!-- オープニング画面 -->
+        <div id="opening-screen" class="screen hidden">
+            <div class="centered-content">
+                <img src="src/images/ruined-door.jpg" alt="廃墟のドア" class="scene-image">
+            </div>
+        </div>
+
+        <!-- オープニング2画面 -->
+        <div id="opening2-screen" class="screen hidden">
+            <div class="split-content">
+                <div class="left-content">
+                    <img src="src/images/ruined-door-opened.png" alt="開いたドア" class="scene-image">
+                </div>
+                <div class="right-content">
+                    <h2>暗証番号を入力せよ</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- クイズイントロ画面 -->
+        <div id="quiz-intro-screen" class="screen hidden">
+            <div class="split-content">
+                <div class="left-content">
+                    <img src="src/images/principals-office.png" alt="校長室" class="scene-image">
+                </div>
+                <div class="right-content">
+                    <h2>黒水校長が現れた！</h2>
+                    <button id="challenge-button" class="button">挑戦する</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- クイズ1画面 -->
+        <div id="quiz-screen" class="screen hidden">
+            <h1 class="center-text">基本問題をクリアせよ！</h1>
+            <p class="center-text">元の高校に戻せ！と入力してスタートせよ</p>
+            
+            <div class="sidebar">
+                <h3>モデル設定</h3>
+                <div class="radio-group">
+                    <input type="radio" id="gpt-4o" name="model-choice" value="gpt-4o" checked>
+                    <label for="gpt-4o">gpt-4o</label>
+                </div>
+                <div class="radio-group">
+                    <input type="radio" id="gemini" name="model-choice" value="gemini">
+                    <label for="gemini">gemini</label>
+                </div>
+                
+                <h3>音声設定</h3>
+                <div class="toggle-group">
+                    <input type="checkbox" id="tts-enabled" checked>
+                    <label for="tts-enabled">音声読み上げ</label>
+                </div>
+                <div class="radio-group">
+                    <input type="radio" id="openai-tts" name="tts-provider" value="openai" checked>
+                    <label for="openai-tts">openai</label>
+                </div>
+                <div class="radio-group">
+                    <input type="radio" id="google-tts" name="tts-provider" value="google">
+                    <label for="google-tts">google</label>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages"></div>
+            </div>
+            
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="あなたの回答を入力してください">
+                <button id="send-button">送信</button>
+            </div>
+        </div>
+
+        <!-- 中間成功画面 -->
+        <div id="middle-success-screen" class="screen hidden">
+            <div class="centered-content">
+                <img src="src/images/school-gate.png" alt="学校の門" class="scene-image">
+                <p class="center-text">「ふん！基本的な学力や知識はあるようやね……だが第二関門が待っとるぞ！」</p>
+                <button id="next-quiz-button" class="button">次に進む</button>
+            </div>
+        </div>
+
+        <!-- クイズ2画面 -->
+        <div id="quiz2-screen" class="screen hidden">
+            <h1 class="center-text">附設に関する質問をクリアせよ！</h1>
+            
+            <div class="sidebar">
+                <h3>モデル設定</h3>
+                <div class="radio-group">
+                    <input type="radio" id="gpt-4o-2" name="model-choice-2" value="gpt-4o" checked>
+                    <label for="gpt-4o-2">gpt-4o</label>
+                </div>
+                <div class="radio-group">
+                    <input type="radio" id="gemini-2" name="model-choice-2" value="gemini">
+                    <label for="gemini-2">gemini</label>
+                </div>
+                
+                <h3>音声設定</h3>
+                <div class="toggle-group">
+                    <input type="checkbox" id="tts-enabled-2" checked>
+                    <label for="tts-enabled-2">音声読み上げ</label>
+                </div>
+                <div class="radio-group">
+                    <input type="radio" id="openai-tts-2" name="tts-provider-2" value="openai" checked>
+                    <label for="openai-tts-2">openai</label>
+                </div>
+                <div class="radio-group">
+                    <input type="radio" id="google-tts-2" name="tts-provider-2" value="google">
+                    <label for="google-tts-2">google</label>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div id="chat-messages-2" class="chat-messages"></div>
+            </div>
+            
+            <div class="input-container">
+                <input type="text" id="user-input-2" placeholder="あなたの回答を入力してください">
+                <button id="send-button-2">送信</button>
+            </div>
+        </div>
+
+        <!-- 最終成功画面 -->
+        <div id="final-success-screen" class="screen hidden">
+            <div class="centered-content">
+                <p class="center-text">「ちぃぃっ……まさか全問正解するとは……」</p>
+                <img src="src/images/anger-kuromizu.png" alt="怒る黒水" class="scene-image">
+                <button id="next-button" class="button">次へ</button>
+            </div>
+        </div>
+
+        <!-- エンディング画面 -->
+        <div id="ending-screen" class="screen hidden">
+            <div class="centered-content">
+                <img src="src/images/manager-room-empty.png" alt="空の部屋" class="scene-image">
+            </div>
+        </div>
+
+        <!-- オーディオ要素 -->
+        <audio id="door-open-sound" src="src/audio/door-open.mp3" preload="auto"></audio>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html> 

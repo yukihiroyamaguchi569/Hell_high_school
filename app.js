@@ -157,10 +157,7 @@ function setupEventListeners() {
     addSidebarToggle('quiz2');
     
     // クイズ1画面
-    document.getElementById('send-button').addEventListener('click', () => {
-        handleSubmit('quiz');
-    });
-    
+    // 送信ボタンは削除されたのでエンターキーのみで送信
     document.getElementById('user-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             handleSubmit('quiz');

@@ -54,7 +54,7 @@ def load_prompt_from_file(file_path):
 def init_session_state():
     """Initialize session state variables"""
     if 'game_state' not in st.session_state:
-        st.session_state.game_state = 'title'  
+        st.session_state.game_state = 'opening'  
     if 'messages' not in st.session_state:
         st.session_state.messages = []
     if 'openai_messages' not in st.session_state:
@@ -598,7 +598,7 @@ def display_opening():
     
     # 左側のカラムに画像を表示
     with col1:
-        st.image("src/images/manager-room-door.png", use_container_width=True)
+        st.image("src/images/ruined-door.jpg", use_container_width=True)
     
     # 右側のカラムに暗証番号入力フォームを表示（垂直方向の中央に配置）
     with col2:
@@ -626,55 +626,38 @@ def display_opening():
                 st.error("暗証番号が間違っているようだ")
 
 def display_opening2():
-    # 2カラムレイアウトを作成（左側に画像、右側にフォーム）
+    
     col1, col2 = st.columns([1, 1])
     
-    # 左側のカラムに画像を表示
     with col1:
-        st.image("src/images/manager-room-door-open.png", use_container_width=True)
+        st.image("src/images/ruined-door-opened.png", use_container_width=True)
     
-    # 右側のカラムに暗証番号入力フォームを表示（垂直方向の中央に配置）
     with col2:
-        
-        # 空白を入れて上部に余白を作成
         st.markdown("<div style='margin-top: 30%;'></div>", unsafe_allow_html=True)
-
-        # 垂直方向の中央揃えのためのCSSとHTMLを使用
         st.markdown("""
             <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
                 <h2 style="margin-bottom: 20px;">暗証番号を入力せよ</h2>
             </div>
         """, unsafe_allow_html=True)
-
-
+    
+    # 音声再生と画面遷移の処理を分離
+    st.markdown("<div style='height: 0px;'></div>", unsafe_allow_html=True)  # 非表示のスペーサー
+    
     # ドアが開く音を再生
     try:
         with open("src/audio/door-open.mp3", "rb") as f:
             audio_bytes = f.read()
         
-        # Base64エンコードしてHTMLに埋め込み
         audio_b64 = base64.b64encode(audio_bytes).decode()
         
         st.markdown(f"""
         <audio autoplay style="display: none;">
             <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
         </audio>
-        <script>
-            // 音声再生を確実にするためのJavaScript
-            document.addEventListener('DOMContentLoaded', function() {{
-                const audio = document.querySelector('audio[autoplay]');
-                if (audio) {{
-                    audio.play().catch(function(error) {{
-                        console.log('音声再生に失敗しました:', error);
-                    }});
-                }}
-            }});
-        </script>
         """, unsafe_allow_html=True)
     except FileNotFoundError:
         st.warning("音声ファイルが見つかりません: src/audio/door-open.mp3")
     
-    #st.success("鍵が開いた・・")
     # 音が再生されるまで少し待機
     time.sleep(2)
     st.session_state.game_state = 'quiz_intro'
@@ -777,7 +760,7 @@ def display_quiz_intro():
         st.markdown("""
             <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
                 <h2 class="title-container" style="font-size: 1.5rem; margin: 0; padding: 0;">
-                    <div class="subtitle">なんね、あんたら？元の附設にもどしたい？<br>あんたら本当に卒業生かね？<br>ちょっと試させてもらおう</div>
+                    <div class="subtitle">黒水校長が現れた！</div>
                 </h2>
             </div>
         """, unsafe_allow_html=True)

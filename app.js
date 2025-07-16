@@ -846,14 +846,14 @@ async function handleSubmit(quizType) {
 // 成功条件をチェックする関数
 function checkSuccessCondition(quizType, aiResponse) {
     if (quizType === 'quiz') {
-        if (aiResponse.includes('クイズクリア') || aiResponse.includes('次のステージ')) {
+        if (aiResponse.includes('これでクイズ1は終了だ')) {
             gameState.quiz1Completed = true;
             setTimeout(() => {
                 showScreen('middleSuccess');
             }, 3000);
         }
     } else if (quizType === 'quiz2') {
-        if (aiResponse.includes('クイズクリア') || aiResponse.includes('最終ステージ')) {
+        if (aiResponse.includes('これでクイズ2は終了だ')) {
             gameState.quiz2Completed = true;
             setTimeout(() => {
                 showScreen('finalSuccess');

@@ -381,72 +381,17 @@ function startImageFadeEffect() {
     }
 }
 
-// メッセージ送信を処理する
-async function handleSubmit(quizType) {
-    const inputId = quizType === 'quiz' ? 'user-input' : 'user-input-2';
-    const messagesContainerId = quizType === 'quiz' ? 'chat-messages' : 'chat-messages-2';
+// ローディングインジケーターを作成する関数
+function createLoadingIndicator() {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading-indicator';
     
-    const inputElement = document.getElementById(inputId);
-    const currentInput = inputElement.value.trim();
-    
-    if (currentInput) {
-        // ユーザーメッセージを追加
-        const userMessage = {
-            role: 'user',
-            content: currentInput
-        };
-        
-        gameState.messages.push(userMessage);
-        gameState.openaiMessages.push({
-            role: 'user',
-            content: currentInput
-        });
-        
-        // 特定のメッセージ「元の高校に戻せ」の場合、ユーザーメッセージを表示しない
-        const isFirstMessageInQuiz1 = quizType === 'quiz' && gameState.messages.length === 1 && currentInput === '元の高校に戻せ';
-        const isFirstMessageInQuiz2 = quizType === 'quiz2' && gameState.messages.length === 1 && currentInput === '附設のことなら何でも聞いてみろ！';
-        
-        if (!isFirstMessageInQuiz1 && !isFirstMessageInQuiz2) {
-            // ユーザーメッセージを表示
-            displayMessage('user', currentInput, messagesContainerId);
-        }
-        
-        // 入力フィールドをクリア
-        inputElement.value = '';
-        
-        // AIの応答を取得
-        const aiResponse = await getChatResponse(gameState.openaiMessages);
-        
-        if (aiResponse) {
-            // アシスタントメッセージを追加
-            const assistantMessage = {
-                role: 'assistant',
-                content: aiResponse
-            };
-            
-            gameState.messages.push(assistantMessage);
-            gameState.openaiMessages.push({
-                role: 'assistant',
-                content: aiResponse
-            });
-            
-            // アシスタントメッセージを表示
-            displayMessage('assistant', aiResponse, messagesContainerId, true);
-            
-            // クイズ完了チェック
-            if (quizType === 'quiz' && aiResponse.includes('これでクイズ1は終了だ')) {
-                gameState.quiz1Completed = true;
-                setTimeout(() => {
-                    showScreen('middleSuccess');
-                }, 2000);
-            } else if (quizType === 'quiz2' && aiResponse.includes('これでクイズ2は終了だ') && gameState.messages.length > 3) {
-                gameState.quiz2Completed = true;
-                setTimeout(() => {
-                    showScreen('finalSuccess');
-                }, 2000);
-            }
-        }
+    for (let i = 0; i < 4; i++) {
+        const dot = document.createElement('div');
+        loadingDiv.appendChild(dot);
     }
+    
+    return loadingDiv;
 }
 
 // メッセージを表示する
@@ -466,6 +411,7 @@ function displayMessage(role, content, containerId, isNewMessage = false) {
         }
         
         // 音声を生成して再生（新しいメッセージの場合のみ）
+        // 音声はテキスト表示を待たずに準備でき次第再生
         if (gameState.ttsEnabled && isNewMessage) {
             generateAndPlaySpeech(content);
         }
@@ -473,13 +419,20 @@ function displayMessage(role, content, containerId, isNewMessage = false) {
     
     const contentElement = document.createElement('div');
     contentElement.className = 'message-content';
-    contentElement.textContent = content;
     
     messageElement.appendChild(contentElement);
     messagesContainer.appendChild(messageElement);
     
     // スクロールを最下部に移動
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // アシスタントのメッセージにタイピングエフェクトを適用
+    if (role === 'assistant') {
+        typeWriter(contentElement, content, 180);
+    } else {
+        // ユーザーメッセージはそのまま表示
+        contentElement.textContent = content;
+    }
 }
 
 // AIの応答を取得する
@@ -562,11 +515,13 @@ async function generateAndPlaySpeech(text, isFinalSuccess = false) {
         // 読み方ガイドを適用
         const modifiedText = applyPronunciationGuides(text);
         
+        // 音声生成開始前にローディングインジケーターを表示するなどの処理を追加できます
+        
         let audioData = null;
         
         if (gameState.ttsProvider === 'openai') {
-            // OpenAI TTSを使用
-            const response = await fetch('https://api.openai.com/v1/audio/speech', {
+            // OpenAI TTSを使用 - 非同期で音声を生成
+            const fetchPromise = fetch('https://api.openai.com/v1/audio/speech', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -580,6 +535,13 @@ async function generateAndPlaySpeech(text, isFinalSuccess = false) {
                 })
             });
             
+            // タイムアウト処理を追加（オプション）
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('音声生成がタイムアウトしました')), 10000);
+            });
+            
+            // 音声データを取得
+            const response = await Promise.race([fetchPromise, timeoutPromise]);
             audioData = await response.blob();
         } else {
             // Google TTSを使用
@@ -593,6 +555,12 @@ async function generateAndPlaySpeech(text, isFinalSuccess = false) {
         if (audioData) {
             const audioUrl = URL.createObjectURL(audioData);
             const audioElement = new Audio(audioUrl);
+            
+            // 音声データのプリロード
+            await new Promise(resolve => {
+                audioElement.oncanplaythrough = resolve;
+                audioElement.load();
+            });
             
             // 最終成功画面の場合、音声再生完了後にフェードエフェクトを開始
             if (isFinalSuccess) {
@@ -713,6 +681,100 @@ function showApiKeyDialog() {
             alert('OpenAI APIキーを入力してください。');
         }
     });
+}
+
+// フォーム送信処理
+async function handleSubmit(quizType) {
+    const inputId = quizType === 'quiz' ? 'user-input' : 'user-input-2';
+    const messagesContainerId = quizType === 'quiz' ? 'chat-messages' : 'chat-messages-2';
+    const input = document.getElementById(inputId);
+    const userMessage = input.value.trim();
+    
+    if (!userMessage) return;
+    
+    // 入力フィールドをクリア
+    input.value = '';
+    
+    // ユーザーメッセージを表示
+    displayMessage('user', userMessage, messagesContainerId);
+    
+    // メッセージを保存
+    gameState.messages.push({ role: 'user', content: userMessage });
+    gameState.openaiMessages.push({ role: 'user', content: userMessage });
+    
+    // ローディングインジケーターを表示
+    const messagesContainer = document.getElementById(messagesContainerId);
+    const loadingElement = document.createElement('div');
+    loadingElement.className = 'message assistant-message';
+    
+    if (gameState.avatarImage) {
+        const avatarElement = document.createElement('img');
+        avatarElement.className = 'avatar';
+        avatarElement.src = 'src/images/opening.png';
+        loadingElement.appendChild(avatarElement);
+    }
+    
+    const loadingContent = document.createElement('div');
+    loadingContent.className = 'message-content';
+    loadingContent.appendChild(createLoadingIndicator());
+    
+    loadingElement.appendChild(loadingContent);
+    messagesContainer.appendChild(loadingElement);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // AIの応答を取得
+    const aiResponse = await getChatResponse(gameState.openaiMessages);
+    
+    // ローディングインジケーターを削除
+    messagesContainer.removeChild(loadingElement);
+    
+    if (aiResponse) {
+        // AIの応答を表示
+        displayMessage('assistant', aiResponse, messagesContainerId, true);
+        
+        // メッセージを保存
+        gameState.messages.push({ role: 'assistant', content: aiResponse });
+        gameState.openaiMessages.push({ role: 'assistant', content: aiResponse });
+        
+        // 成功条件をチェック
+        if (quizType === 'quiz') {
+            if (aiResponse.includes('クイズクリア') || aiResponse.includes('次のステージ')) {
+                gameState.quiz1Completed = true;
+                setTimeout(() => {
+                    showScreen('middleSuccess');
+                }, 3000);
+            }
+        } else if (quizType === 'quiz2') {
+            if (aiResponse.includes('クイズクリア') || aiResponse.includes('最終ステージ')) {
+                gameState.quiz2Completed = true;
+                setTimeout(() => {
+                    showScreen('finalSuccess');
+                }, 3000);
+            }
+        }
+    } else {
+        // エラーメッセージを表示
+        displayMessage('assistant', 'エラーが発生しました。もう一度お試しください。', messagesContainerId, true);
+    }
+}
+
+// タイピングエフェクトを実装する関数
+function typeWriter(element, text, speed = 30) {
+    let i = 0;
+    element.innerHTML = '';
+    element.classList.add('typing-effect');
+    
+    function type() {
+        if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        } else {
+            element.classList.remove('typing-effect');
+        }
+    }
+    
+    type();
 }
 
 // 初期化を実行

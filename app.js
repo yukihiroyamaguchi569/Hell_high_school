@@ -411,9 +411,19 @@ function displayMessage(role, content, containerId, isNewMessage = false) {
         }
         
         // 音声を生成して再生（新しいメッセージの場合のみ）
-        // 音声はテキスト表示を待たずに準備でき次第再生
+        // 音声準備完了後にテキスト表示を開始する
         if (gameState.ttsEnabled && isNewMessage) {
-            generateAndPlaySpeech(content);
+            const contentElement = document.createElement('div');
+            contentElement.className = 'message-content';
+            messageElement.appendChild(contentElement);
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // 音声ファイルが到着してから再生とタイピングを同時に開始
+            generateAndPlaySpeech(content, false, () => {
+                typeWriter(contentElement, content, 150);
+            });
+            return;
         }
     }
     
@@ -426,7 +436,7 @@ function displayMessage(role, content, containerId, isNewMessage = false) {
     // スクロールを最下部に移動
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
     
-    // アシスタントのメッセージにタイピングエフェクトを適用
+    // アシスタントのメッセージにタイピングエフェクトを適用（音声なしの場合）
     if (role === 'assistant') {
         typeWriter(contentElement, content, 180);
     } else {
@@ -510,7 +520,7 @@ async function getChatResponse(messages) {
 }
 
 // 音声を生成して再生する
-async function generateAndPlaySpeech(text, isFinalSuccess = false) {
+async function generateAndPlaySpeech(text, isFinalSuccess = false, callback = null) {
     try {
         // 読み方ガイドを適用
         const modifiedText = applyPronunciationGuides(text);
@@ -570,10 +580,20 @@ async function generateAndPlaySpeech(text, isFinalSuccess = false) {
                 };
             }
             
+            // 音声再生開始
             audioElement.play();
+            
+            // コールバック関数を実行（タイピングエフェクト開始など）
+            if (callback && typeof callback === 'function') {
+                callback();
+            }
         }
     } catch (error) {
         console.error('音声生成エラー:', error);
+        // エラーが発生した場合でもコールバック関数を実行
+        if (callback && typeof callback === 'function') {
+            callback();
+        }
         // エラーが発生した場合でもフェードエフェクトを開始（最終成功画面の場合）
         if (isFinalSuccess) {
             console.log("音声生成エラー、フェードエフェクト開始");
@@ -729,7 +749,7 @@ async function handleSubmit(quizType) {
     messagesContainer.removeChild(loadingElement);
     
     if (aiResponse) {
-        // AIの応答を表示
+        // AIの応答を表示（音声とタイピングを同期）
         displayMessage('assistant', aiResponse, messagesContainerId, true);
         
         // メッセージを保存

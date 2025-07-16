@@ -192,6 +192,13 @@ function setupEventListeners() {
         showScreen('middleSuccess');
     });
     
+    // 最終成功画面へジャンプするボタン（クイズ1）
+    document.getElementById('jump-to-final-success').addEventListener('click', () => {
+        gameState.quiz1Completed = true;
+        gameState.quiz2Completed = true;
+        showScreen('finalSuccess');
+    });
+    
     // 中間成功画面
     document.getElementById('next-quiz-button').addEventListener('click', () => {
         gameState.currentQuiz = 'quiz2';
@@ -239,6 +246,13 @@ function setupEventListeners() {
     document.getElementById('jump-to-middle-success-2').addEventListener('click', () => {
         gameState.quiz1Completed = true;
         showScreen('middleSuccess');
+    });
+    
+    // 最終成功画面へジャンプするボタン（クイズ2）
+    document.getElementById('jump-to-final-success-2').addEventListener('click', () => {
+        gameState.quiz1Completed = true;
+        gameState.quiz2Completed = true;
+        showScreen('finalSuccess');
     });
     
     // 最終成功画面

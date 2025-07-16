@@ -335,15 +335,10 @@ function showScreen(screenName) {
     if (screens[screenName]) {
         screens[screenName].classList.remove('hidden');
         
-        // 最終成功画面に遷移した場合、セリフを音声で再生し、画像フェードエフェクトを開始
+        // 最終成功画面に遷移した場合、セリフを音声で再生し、音声再生完了後に画像フェードエフェクトを開始
         if (screenName === 'finalSuccess' && gameState.ttsEnabled) {
             const finalSuccessMessage = 'ちぃぃっ....まさか全問正解するとは....';
-            generateAndPlaySpeech(finalSuccessMessage);
-            
-            // 画像フェードエフェクトを開始
-            setTimeout(() => {
-                startImageFadeEffect();
-            }, 3000); // 3秒後にフェードエフェクト開始
+            generateAndPlaySpeech(finalSuccessMessage, true);
         }
     }
 }
@@ -553,7 +548,7 @@ async function getChatResponse(messages) {
 }
 
 // 音声を生成して再生する
-async function generateAndPlaySpeech(text) {
+async function generateAndPlaySpeech(text, isFinalSuccess = false) {
     try {
         // 読み方ガイドを適用
         const modifiedText = applyPronunciationGuides(text);
@@ -589,10 +584,24 @@ async function generateAndPlaySpeech(text) {
         if (audioData) {
             const audioUrl = URL.createObjectURL(audioData);
             const audioElement = new Audio(audioUrl);
+            
+            // 最終成功画面の場合、音声再生完了後にフェードエフェクトを開始
+            if (isFinalSuccess) {
+                audioElement.onended = function() {
+                    console.log("音声再生完了、フェードエフェクト開始");
+                    startImageFadeEffect();
+                };
+            }
+            
             audioElement.play();
         }
     } catch (error) {
         console.error('音声生成エラー:', error);
+        // エラーが発生した場合でもフェードエフェクトを開始（最終成功画面の場合）
+        if (isFinalSuccess) {
+            console.log("音声生成エラー、フェードエフェクト開始");
+            startImageFadeEffect();
+        }
     }
 }
 

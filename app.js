@@ -334,6 +334,12 @@ function showScreen(screenName) {
     // 指定された画面を表示する
     if (screens[screenName]) {
         screens[screenName].classList.remove('hidden');
+        
+        // 最終成功画面に遷移した場合、セリフを音声で再生
+        if (screenName === 'finalSuccess' && gameState.ttsEnabled) {
+            const finalSuccessMessage = 'ちぃぃっ....まさか全問正解するとは....';
+            generateAndPlaySpeech(finalSuccessMessage);
+        }
     }
 }
 

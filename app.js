@@ -226,10 +226,6 @@ function setupEventListeners() {
     });
     
     // クイズ2画面
-    document.getElementById('send-button-2').addEventListener('click', () => {
-        handleSubmit('quiz2');
-    });
-    
     document.getElementById('user-input-2').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             handleSubmit('quiz2');

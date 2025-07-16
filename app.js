@@ -335,6 +335,15 @@ function showScreen(screenName) {
             }, 100); // 遅延を最小限に抑える
         }
         
+        // クイズ2画面に遷移した場合、自動的に「附設のことなら何でも聞いてみろ！」を送信
+        if (screenName === 'quiz2') {
+            setTimeout(() => {
+                const userInput = '附設のことなら何でも聞いてみろ！';
+                document.getElementById('user-input-2').value = userInput;
+                handleSubmit('quiz2');
+            }, 100); // 遅延を最小限に抑える
+        }
+        
         // 最終成功画面に遷移した場合、セリフを音声で再生し、音声再生完了後に画像フェードエフェクトを開始
         if (screenName === 'finalSuccess' && gameState.ttsEnabled) {
             const finalSuccessMessage = 'まじかー！...まさか全問正解するとは....';
@@ -399,8 +408,9 @@ async function handleSubmit(quizType) {
         
         // 特定のメッセージ「元の高校に戻せ」の場合、ユーザーメッセージを表示しない
         const isFirstMessageInQuiz1 = quizType === 'quiz' && gameState.messages.length === 1 && currentInput === '元の高校に戻せ';
+        const isFirstMessageInQuiz2 = quizType === 'quiz2' && gameState.messages.length === 1 && currentInput === '附設のことなら何でも聞いてみろ！';
         
-        if (!isFirstMessageInQuiz1) {
+        if (!isFirstMessageInQuiz1 && !isFirstMessageInQuiz2) {
             // ユーザーメッセージを表示
             displayMessage('user', currentInput, messagesContainerId);
         }

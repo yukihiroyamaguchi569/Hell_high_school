@@ -384,10 +384,19 @@ body {
     border-radius: 20px;
     padding: 0 20px;
     cursor: pointer;
+    height: 46px; /* 入力フィールドと同じ高さに設定 */
 }
 
 #send-button:hover, #send-button-2:hover {
     background-color: #4a4a4a;
+}
+
+/* クイズ2画面の送信ボタンのスタイル */
+#quiz2-screen .button {
+    margin-top: 0;
+    width: auto;
+    height: 46px;
+    padding: 0 20px;
 }
 
 /* APIキー設定ダイアログのスタイル */

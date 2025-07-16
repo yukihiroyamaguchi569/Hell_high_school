@@ -114,6 +114,11 @@ body {
     margin-bottom: 1.5rem;
 }
 
+/* クリック可能な画像 */
+#opening-screen .scene-image {
+    cursor: pointer;
+}
+
 /* 分割コンテンツ */
 .split-content {
     display: flex;

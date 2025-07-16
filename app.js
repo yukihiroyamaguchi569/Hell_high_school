@@ -65,13 +65,6 @@ async function init() {
     
     // 初期画面を表示
     showScreen('opening');
-    setTimeout(() => {
-        showScreen('opening2');
-        playDoorOpenSound();
-        setTimeout(() => {
-            showScreen('quizIntro');
-        }, 2000);
-    }, 2000);
 }
 
 // プロンプトをファイルから読み込む
@@ -130,6 +123,15 @@ async function loadApiKeys() {
 
 // イベントリスナーを設定
 function setupEventListeners() {
+    // opening画面の廃墟のドア画像をクリックしたら次の画面へ
+    document.querySelector('#opening-screen .scene-image').addEventListener('click', () => {
+        showScreen('opening2');
+        playDoorOpenSound();
+        setTimeout(() => {
+            showScreen('quizIntro');
+        }, 2000);
+    });
+    
     // 隠しボタン（クイズ2へジャンプ）
     document.getElementById('jump-to-quiz2').addEventListener('click', () => {
         gameState.currentQuiz = 'quiz2';

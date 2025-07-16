@@ -26,8 +26,7 @@ const screens = {
     quiz: document.getElementById('quiz-screen'),
     middleSuccess: document.getElementById('middle-success-screen'),
     quiz2: document.getElementById('quiz2-screen'),
-    finalSuccess: document.getElementById('final-success-screen'),
-    ending: document.getElementById('ending-screen')
+    finalSuccess: document.getElementById('final-success-screen')
 };
 
 // 音声要素
@@ -271,14 +270,6 @@ function setupEventListeners() {
         gameState.quiz2Completed = true;
         showScreen('finalSuccess');
     });
-    
-    // 最終成功画面
-    document.getElementById('next-button').addEventListener('click', () => {
-        playDoorOpenSound();
-        setTimeout(() => {
-            showScreen('ending');
-        }, 2000);
-    });
 }
 
 // サイドバートグルボタンを追加する関数
@@ -368,11 +359,6 @@ function startImageFadeEffect() {
             // フェードが完了するのを待つ（3秒）
             setTimeout(() => {
                 console.log("フェード完了");
-                // フェードが完了したら次のボタンをクリックできるようにする
-                const nextButton = document.getElementById('next-button');
-                if (nextButton) {
-                    nextButton.style.display = 'block';
-                }
             }, 3000);
         }, 100);
     }

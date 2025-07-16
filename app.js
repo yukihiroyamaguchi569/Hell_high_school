@@ -471,46 +471,60 @@ async function getChatResponse(messages) {
             // 注意: このサンプルコードでは簡略化のため、フロントエンドからの直接APIコールを示していますが、
             // 実際の実装ではセキュリティ上の理由からバックエンドを経由すべきです
             
-            // Gemini用にメッセージをフォーマット
-            const geminiMessages = [];
-            for (let i = 0; i < messages.length - 1; i++) {
-                const msg = messages[i];
-                if (msg.role === 'system') {
-                    geminiMessages.push({
-                        role: 'user',
-                        parts: [{ text: msg.content }]
-                    });
-                } else {
-                    geminiMessages.push({
-                        role: msg.role === 'user' ? 'user' : 'model',
-                        parts: [{ text: msg.content }]
-                    });
-                }
+            // システムプロンプトを取得（最初のメッセージ）
+            let systemPrompt = '';
+            if (messages.length > 0 && messages[0].role === 'system') {
+                systemPrompt = messages[0].content;
             }
             
-            // 最後のメッセージを送信
-            const lastMessage = messages[messages.length - 1];
+            // 会話履歴を構築（システムプロンプトを除く）
+            const conversationMessages = [];
+            for (let i = 0; i < messages.length; i++) {
+                const msg = messages[i];
+                // システムプロンプトはスキップ
+                if (msg.role === 'system') continue;
+                
+                conversationMessages.push({
+                    role: msg.role === 'user' ? 'user' : 'model',
+                    parts: [{ text: msg.content }]
+                });
+            }
+            
+            // APIリクエストを構築
+            const requestBody = {
+                contents: conversationMessages,
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 1000
+                }
+            };
+            
+            // システムプロンプトがある場合は追加
+            if (systemPrompt) {
+                requestBody.systemInstruction = { parts: [{ text: systemPrompt }] };
+            }
             
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEYS.gemini}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    contents: [
-                        {
-                            role: lastMessage.role === 'user' ? 'user' : 'model',
-                            parts: [{ text: lastMessage.content }]
-                        }
-                    ],
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 1000
-                    }
-                })
+                body: JSON.stringify(requestBody)
             });
             
             const data = await response.json();
+            
+            // エラーチェック
+            if (data.error) {
+                console.error('Gemini APIエラー:', data.error);
+                return null;
+            }
+            
+            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+                console.error('Gemini API応答形式エラー:', data);
+                return null;
+            }
+            
             return data.candidates[0].content.parts[0].text;
         }
     } catch (error) {

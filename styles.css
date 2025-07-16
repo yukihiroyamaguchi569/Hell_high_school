@@ -159,6 +159,25 @@ body {
     margin-top: 20px;
 }
 
+/* 最終成功画面の画像スタイル */
+#final-success-screen .scene-image {
+    max-height: 600px; /* 高さを制限して1440*900の画面に収まるようにする */
+    width: 60%; /* 画面幅の60%に設定 */
+    object-fit: contain; /* アスペクト比を維持 */
+    margin: 0 auto 20px; /* 水平方向の中央揃え、下部に余白を追加 */
+    display: block; /* ブロック要素として表示 */
+}
+
+#final-success-screen .center-text {
+    font-size: 1.2rem;
+    margin: 20px 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); /* テキストを見やすくする */
+}
+
+#final-success-screen .button {
+    margin-top: 20px;
+}
+
 /* 分割コンテンツ */
 .split-content {
     display: flex;

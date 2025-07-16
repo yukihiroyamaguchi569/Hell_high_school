@@ -143,6 +143,22 @@ function setupEventListeners() {
         showScreen('quiz2');
     });
     
+    // オープニング画面のデバッグボタン
+    document.getElementById('jump-to-quiz-intro').addEventListener('click', () => {
+        showScreen('quizIntro');
+    });
+    
+    document.getElementById('jump-to-middle-success-opening').addEventListener('click', () => {
+        gameState.quiz1Completed = true;
+        showScreen('middleSuccess');
+    });
+    
+    document.getElementById('jump-to-final-success-opening').addEventListener('click', () => {
+        gameState.quiz1Completed = true;
+        gameState.quiz2Completed = true;
+        showScreen('finalSuccess');
+    });
+    
     // クイズイントロ画面
     document.getElementById('challenge-button').addEventListener('click', () => {
         gameState.messages = [];
@@ -153,6 +169,7 @@ function setupEventListeners() {
     });
     
     // サイドバートグルボタンを追加
+    addSidebarToggle('opening');
     addSidebarToggle('quiz');
     addSidebarToggle('quiz2');
     
@@ -286,12 +303,20 @@ function addSidebarToggle(screenId) {
             sidebar.classList.toggle('visible');
             
             // サイドバーの表示状態に応じてコンテナのクラスを切り替え
-            if (sidebar.classList.contains('visible')) {
-                chatContainer.classList.add('sidebar-visible');
-                inputContainer.classList.add('sidebar-visible');
-            } else {
-                chatContainer.classList.remove('sidebar-visible');
-                inputContainer.classList.remove('sidebar-visible');
+            if (chatContainer) {
+                if (sidebar.classList.contains('visible')) {
+                    chatContainer.classList.add('sidebar-visible');
+                } else {
+                    chatContainer.classList.remove('sidebar-visible');
+                }
+            }
+            
+            if (inputContainer) {
+                if (sidebar.classList.contains('visible')) {
+                    inputContainer.classList.add('sidebar-visible');
+                } else {
+                    inputContainer.classList.remove('sidebar-visible');
+                }
             }
         });
     }

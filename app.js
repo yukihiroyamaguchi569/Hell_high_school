@@ -328,7 +328,7 @@ function showScreen(screenName) {
         
         // 最終成功画面に遷移した場合、セリフを音声で再生し、音声再生完了後に画像フェードエフェクトを開始
         if (screenName === 'finalSuccess' && gameState.ttsEnabled) {
-            const finalSuccessMessage = 'ちぃぃっ....まさか全問正解するとは....';
+            const finalSuccessMessage = 'まじかー！...まさか全問正解するとは....';
             generateAndPlaySpeech(finalSuccessMessage, true);
         }
     }
@@ -355,6 +355,9 @@ function startImageFadeEffect() {
             // 怒りの黒水の画像を徐々に消す
             angerImage.style.opacity = "0";
             emptyRoomImage.style.opacity = "1";
+            
+            // ドアが開く音を再生
+            playDoorOpenSound();
             
             // フェードが完了するのを待つ（3秒）
             setTimeout(() => {

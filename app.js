@@ -745,10 +745,20 @@ async function handleSubmit(quizType) {
     // AIの応答を取得
     const aiResponse = await getChatResponse(gameState.openaiMessages);
     
-    if (aiResponse) {
+            if (aiResponse) {
         // メッセージを保存
         gameState.messages.push({ role: 'assistant', content: aiResponse });
         gameState.openaiMessages.push({ role: 'assistant', content: aiResponse });
+        
+        // 成功条件をチェック - 成功条件に一致する場合は表示せずに次の画面へ
+        if ((quizType === 'quiz' && aiResponse.includes('これでクイズ1は終了だ')) || 
+            (quizType === 'quiz2' && aiResponse.includes('これでクイズ2は終了だ'))) {
+            // ローディングインジケーターを削除
+            messagesContainer.removeChild(loadingElement);
+            // 成功条件をチェックして次の画面へ
+            checkSuccessCondition(quizType, aiResponse);
+            return;
+        }
         
         if (gameState.ttsEnabled) {
             // TTSが有効な場合
@@ -780,9 +790,6 @@ async function handleSubmit(quizType) {
                 
                 // タイピングエフェクトを開始
                 typeWriter(contentElement, aiResponse, 150);
-                
-                // 成功条件をチェック
-                checkSuccessCondition(quizType, aiResponse);
             });
         } else {
             // TTSが無効な場合は、ローディングインジケーターを削除
@@ -811,9 +818,6 @@ async function handleSubmit(quizType) {
             
             // タイピングエフェクトを開始
             typeWriter(contentElement, aiResponse, 180);
-            
-            // 成功条件をチェック
-            checkSuccessCondition(quizType, aiResponse);
         }
     } else {
         // エラーの場合はローディングインジケーターを削除
@@ -848,16 +852,14 @@ function checkSuccessCondition(quizType, aiResponse) {
     if (quizType === 'quiz') {
         if (aiResponse.includes('これでクイズ1は終了だ')) {
             gameState.quiz1Completed = true;
-            setTimeout(() => {
-                showScreen('middleSuccess');
-            }, 3000);
+            // すぐに次の画面へ遷移
+            showScreen('middleSuccess');
         }
     } else if (quizType === 'quiz2') {
         if (aiResponse.includes('これでクイズ2は終了だ')) {
             gameState.quiz2Completed = true;
-            setTimeout(() => {
-                showScreen('finalSuccess');
-            }, 3000);
+            // すぐに次の画面へ遷移
+            showScreen('finalSuccess');
         }
     }
 }

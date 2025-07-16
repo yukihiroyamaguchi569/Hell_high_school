@@ -152,6 +152,10 @@ function setupEventListeners() {
         showScreen('quiz');
     });
     
+    // サイドバートグルボタンを追加
+    addSidebarToggle('quiz');
+    addSidebarToggle('quiz2');
+    
     // クイズ1画面
     document.getElementById('send-button').addEventListener('click', () => {
         handleSubmit('quiz');
@@ -235,6 +239,39 @@ function setupEventListeners() {
             showScreen('ending');
         }, 2000);
     });
+}
+
+// サイドバートグルボタンを追加する関数
+function addSidebarToggle(screenId) {
+    // トグルボタン要素を作成
+    const toggleButton = document.createElement('button');
+    toggleButton.className = 'sidebar-toggle';
+    toggleButton.innerHTML = '⚙️';
+    toggleButton.setAttribute('aria-label', '設定');
+    
+    // 対象の画面にトグルボタンを追加
+    const targetScreen = document.getElementById(`${screenId}-screen`);
+    if (targetScreen) {
+        targetScreen.appendChild(toggleButton);
+        
+        // クリックイベントを追加
+        toggleButton.addEventListener('click', () => {
+            const sidebar = targetScreen.querySelector('.sidebar');
+            const chatContainer = targetScreen.querySelector('.chat-container');
+            const inputContainer = targetScreen.querySelector('.input-container');
+            
+            sidebar.classList.toggle('visible');
+            
+            // サイドバーの表示状態に応じてコンテナのクラスを切り替え
+            if (sidebar.classList.contains('visible')) {
+                chatContainer.classList.add('sidebar-visible');
+                inputContainer.classList.add('sidebar-visible');
+            } else {
+                chatContainer.classList.remove('sidebar-visible');
+                inputContainer.classList.remove('sidebar-visible');
+            }
+        });
+    }
 }
 
 // 画面を表示する

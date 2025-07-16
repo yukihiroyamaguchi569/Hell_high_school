@@ -725,7 +725,7 @@ async function handleSubmit(quizType) {
     // ローディングインジケーターを表示
     const messagesContainer = document.getElementById(messagesContainerId);
     const loadingElement = document.createElement('div');
-    loadingElement.className = 'message assistant-message';
+    loadingElement.className = 'message assistant-message loading';
     
     if (gameState.avatarImage) {
         const avatarElement = document.createElement('img');
@@ -745,36 +745,120 @@ async function handleSubmit(quizType) {
     // AIの応答を取得
     const aiResponse = await getChatResponse(gameState.openaiMessages);
     
-    // ローディングインジケーターを削除
-    messagesContainer.removeChild(loadingElement);
-    
     if (aiResponse) {
-        // AIの応答を表示（音声とタイピングを同期）
-        displayMessage('assistant', aiResponse, messagesContainerId, true);
-        
         // メッセージを保存
         gameState.messages.push({ role: 'assistant', content: aiResponse });
         gameState.openaiMessages.push({ role: 'assistant', content: aiResponse });
         
-        // 成功条件をチェック
-        if (quizType === 'quiz') {
-            if (aiResponse.includes('クイズクリア') || aiResponse.includes('次のステージ')) {
-                gameState.quiz1Completed = true;
-                setTimeout(() => {
-                    showScreen('middleSuccess');
-                }, 3000);
+        if (gameState.ttsEnabled) {
+            // TTSが有効な場合
+            // ローディングインジケーターを削除せず、音声生成と再生を行う
+            generateAndPlaySpeech(aiResponse, false, () => {
+                // 音声の準備ができたらローディングインジケーターを削除
+                messagesContainer.removeChild(loadingElement);
+                
+                // 新しいメッセージ要素を作成
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message assistant-message';
+                
+                // アバター画像を追加
+                if (gameState.avatarImage) {
+                    const avatarElement = document.createElement('img');
+                    avatarElement.className = 'avatar';
+                    avatarElement.src = 'src/images/opening.png';
+                    messageElement.appendChild(avatarElement);
+                }
+                
+                // コンテンツ要素を作成
+                const contentElement = document.createElement('div');
+                contentElement.className = 'message-content';
+                messageElement.appendChild(contentElement);
+                
+                // メッセージ要素をコンテナに追加
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // タイピングエフェクトを開始
+                typeWriter(contentElement, aiResponse, 150);
+                
+                // 成功条件をチェック
+                checkSuccessCondition(quizType, aiResponse);
+            });
+        } else {
+            // TTSが無効な場合は、ローディングインジケーターを削除
+            messagesContainer.removeChild(loadingElement);
+            
+            // 新しいメッセージ要素を作成
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message assistant-message';
+            
+            // アバター画像を追加
+            if (gameState.avatarImage) {
+                const avatarElement = document.createElement('img');
+                avatarElement.className = 'avatar';
+                avatarElement.src = 'src/images/opening.png';
+                messageElement.appendChild(avatarElement);
             }
-        } else if (quizType === 'quiz2') {
-            if (aiResponse.includes('クイズクリア') || aiResponse.includes('最終ステージ')) {
-                gameState.quiz2Completed = true;
-                setTimeout(() => {
-                    showScreen('finalSuccess');
-                }, 3000);
-            }
+            
+            // コンテンツ要素を作成
+            const contentElement = document.createElement('div');
+            contentElement.className = 'message-content';
+            messageElement.appendChild(contentElement);
+            
+            // メッセージ要素をコンテナに追加
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // タイピングエフェクトを開始
+            typeWriter(contentElement, aiResponse, 180);
+            
+            // 成功条件をチェック
+            checkSuccessCondition(quizType, aiResponse);
         }
     } else {
+        // エラーの場合はローディングインジケーターを削除
+        messagesContainer.removeChild(loadingElement);
+        
         // エラーメッセージを表示
-        displayMessage('assistant', 'エラーが発生しました。もう一度お試しください。', messagesContainerId, true);
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message assistant-message';
+        
+        // アバター画像を追加
+        if (gameState.avatarImage) {
+            const avatarElement = document.createElement('img');
+            avatarElement.className = 'avatar';
+            avatarElement.src = 'src/images/opening.png';
+            messageElement.appendChild(avatarElement);
+        }
+        
+        // コンテンツ要素を作成
+        const contentElement = document.createElement('div');
+        contentElement.className = 'message-content';
+        contentElement.textContent = 'エラーが発生しました。もう一度お試しください。';
+        messageElement.appendChild(contentElement);
+        
+        // メッセージ要素をコンテナに追加
+        messagesContainer.appendChild(messageElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
+
+// 成功条件をチェックする関数
+function checkSuccessCondition(quizType, aiResponse) {
+    if (quizType === 'quiz') {
+        if (aiResponse.includes('クイズクリア') || aiResponse.includes('次のステージ')) {
+            gameState.quiz1Completed = true;
+            setTimeout(() => {
+                showScreen('middleSuccess');
+            }, 3000);
+        }
+    } else if (quizType === 'quiz2') {
+        if (aiResponse.includes('クイズクリア') || aiResponse.includes('最終ステージ')) {
+            gameState.quiz2Completed = true;
+            setTimeout(() => {
+                showScreen('finalSuccess');
+            }, 3000);
+        }
     }
 }
 

@@ -186,6 +186,12 @@ function setupEventListeners() {
         gameState.ttsProvider = 'google';
     });
     
+    // 中間成功画面へジャンプするボタン（クイズ1）
+    document.getElementById('jump-to-middle-success').addEventListener('click', () => {
+        gameState.quiz1Completed = true;
+        showScreen('middleSuccess');
+    });
+    
     // 中間成功画面
     document.getElementById('next-quiz-button').addEventListener('click', () => {
         gameState.currentQuiz = 'quiz2';
@@ -227,6 +233,12 @@ function setupEventListeners() {
     
     document.getElementById('google-tts-2').addEventListener('change', () => {
         gameState.ttsProvider = 'google';
+    });
+    
+    // 中間成功画面へジャンプするボタン（クイズ2）
+    document.getElementById('jump-to-middle-success-2').addEventListener('click', () => {
+        gameState.quiz1Completed = true;
+        showScreen('middleSuccess');
     });
     
     // 最終成功画面

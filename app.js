@@ -1,6 +1,6 @@
 // ゲームの状態管理
 const gameState = {
-    currentScreen: 'title',
+    currentScreen: 'opening',
     quiz1Completed: false,
     quiz2Completed: false,
     currentQuiz: 'quiz1',
@@ -20,7 +20,6 @@ const prompts = {
 
 // DOM要素の参照
 const screens = {
-    title: document.getElementById('title-screen'),
     opening: document.getElementById('opening-screen'),
     opening2: document.getElementById('opening2-screen'),
     quizIntro: document.getElementById('quiz-intro-screen'),
@@ -65,7 +64,14 @@ async function init() {
     setupEventListeners();
     
     // 初期画面を表示
-    showScreen('title');
+    showScreen('opening');
+    setTimeout(() => {
+        showScreen('opening2');
+        playDoorOpenSound();
+        setTimeout(() => {
+            showScreen('quizIntro');
+        }, 2000);
+    }, 2000);
 }
 
 // プロンプトをファイルから読み込む
@@ -124,18 +130,6 @@ async function loadApiKeys() {
 
 // イベントリスナーを設定
 function setupEventListeners() {
-    // タイトル画面
-    document.getElementById('game-start-button').addEventListener('click', () => {
-        showScreen('opening');
-        setTimeout(() => {
-            showScreen('opening2');
-            playDoorOpenSound();
-            setTimeout(() => {
-                showScreen('quizIntro');
-            }, 2000);
-        }, 2000);
-    });
-    
     // 隠しボタン（クイズ2へジャンプ）
     document.getElementById('jump-to-quiz2').addEventListener('click', () => {
         gameState.currentQuiz = 'quiz2';

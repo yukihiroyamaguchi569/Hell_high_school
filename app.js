@@ -326,6 +326,15 @@ function showScreen(screenName) {
     if (screens[screenName]) {
         screens[screenName].classList.remove('hidden');
         
+        // クイズ1画面に遷移した場合、自動的に「元の高校に戻せ」を送信
+        if (screenName === 'quiz') {
+            setTimeout(() => {
+                const userInput = '元の高校に戻せ';
+                document.getElementById('user-input').value = userInput;
+                handleSubmit('quiz');
+            }, 100); // 遅延を最小限に抑える
+        }
+        
         // 最終成功画面に遷移した場合、セリフを音声で再生し、音声再生完了後に画像フェードエフェクトを開始
         if (screenName === 'finalSuccess' && gameState.ttsEnabled) {
             const finalSuccessMessage = 'まじかー！...まさか全問正解するとは....';
@@ -388,8 +397,13 @@ async function handleSubmit(quizType) {
             content: currentInput
         });
         
-        // ユーザーメッセージを表示
-        displayMessage('user', currentInput, messagesContainerId);
+        // 特定のメッセージ「元の高校に戻せ」の場合、ユーザーメッセージを表示しない
+        const isFirstMessageInQuiz1 = quizType === 'quiz' && gameState.messages.length === 1 && currentInput === '元の高校に戻せ';
+        
+        if (!isFirstMessageInQuiz1) {
+            // ユーザーメッセージを表示
+            displayMessage('user', currentInput, messagesContainerId);
+        }
         
         // 入力フィールドをクリア
         inputElement.value = '';

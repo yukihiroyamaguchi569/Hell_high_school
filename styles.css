@@ -33,6 +33,13 @@ body {
     display: none !important;
 }
 
+.full-height {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .button {
     background-color: #383838;
     color: white;
@@ -114,9 +121,14 @@ body {
     margin-bottom: 1.5rem;
 }
 
-/* クリック可能な画像 */
+/* オープニング画面の画像スタイル */
 #opening-screen .scene-image {
     cursor: pointer;
+    height: 900px; /* 画面の高さいっぱいに設定 */
+    width: auto; /* 幅は自動調整 */
+    object-fit: contain; /* アスペクト比を維持 */
+    margin: 0 auto; /* 水平方向の中央揃え */
+    display: block; /* ブロック要素として表示 */
 }
 
 /* 分割コンテンツ */

@@ -131,6 +131,15 @@ body {
     display: block; /* ブロック要素として表示 */
 }
 
+/* オープニング2画面の画像スタイル */
+#opening2-screen .scene-image {
+    height: 900px; /* 画面の高さいっぱいに設定 */
+    width: auto; /* 幅は自動調整 */
+    object-fit: contain; /* アスペクト比を維持 */
+    margin: 0 auto; /* 水平方向の中央揃え */
+    display: block; /* ブロック要素として表示 */
+}
+
 /* 分割コンテンツ */
 .split-content {
     display: flex;

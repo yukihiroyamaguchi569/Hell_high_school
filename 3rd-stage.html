@@ -158,9 +158,11 @@
         <!-- 最終成功画面 -->
         <div id="final-success-screen" class="screen hidden">
             <div class="centered-content">
-                <p class="center-text">「ちぃぃっ……まさか全問正解するとは……」</p>
-                <img src="src/images/anger-kuromizu.png" alt="怒る黒水" class="scene-image">
-                <button id="next-button" class="button">次へ</button>
+                <div class="image-transition-container">
+                    <img src="src/images/anger-kuromizu.png" alt="怒る黒水" class="fade-image" id="anger-image">
+                    <img src="src/images/manager-room-empty.png" alt="空の部屋" class="fade-image hidden" id="empty-room-image">
+                </div>
+                <button id="next-button" class="button" style="display: none;">次へ</button>
             </div>
         </div>
 

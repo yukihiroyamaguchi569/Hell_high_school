@@ -168,14 +168,45 @@ body {
     display: block; /* ブロック要素として表示 */
 }
 
+/* 画像フェードエフェクト用スタイル */
+.image-transition-container {
+    position: relative;
+    width: 60%;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.fade-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: opacity 3s ease-in-out;
+    opacity: 1;
+    z-index: 1;
+}
+
+.fade-image.hidden {
+    opacity: 0;
+    z-index: 0;
+}
+
 #final-success-screen .center-text {
     font-size: 1.2rem;
     margin: 20px 0;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); /* テキストを見やすくする */
 }
 
+/* 最終成功画面のボタンスタイル */
 #final-success-screen .button {
     margin-top: 20px;
+    z-index: 2;
+    position: relative;
 }
 
 /* 分割コンテンツ */

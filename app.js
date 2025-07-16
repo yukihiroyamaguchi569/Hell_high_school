@@ -335,11 +335,51 @@ function showScreen(screenName) {
     if (screens[screenName]) {
         screens[screenName].classList.remove('hidden');
         
-        // 最終成功画面に遷移した場合、セリフを音声で再生
+        // 最終成功画面に遷移した場合、セリフを音声で再生し、画像フェードエフェクトを開始
         if (screenName === 'finalSuccess' && gameState.ttsEnabled) {
             const finalSuccessMessage = 'ちぃぃっ....まさか全問正解するとは....';
             generateAndPlaySpeech(finalSuccessMessage);
+            
+            // 画像フェードエフェクトを開始
+            setTimeout(() => {
+                startImageFadeEffect();
+            }, 3000); // 3秒後にフェードエフェクト開始
         }
+    }
+}
+
+// 画像フェードエフェクトを開始する
+function startImageFadeEffect() {
+    const angerImage = document.getElementById('anger-image');
+    const emptyRoomImage = document.getElementById('empty-room-image');
+    
+    if (angerImage && emptyRoomImage) {
+        console.log("フェードエフェクト開始");
+        
+        // 両方の画像が表示されていることを確認
+        angerImage.style.opacity = "1";
+        emptyRoomImage.style.opacity = "0";
+        
+        // 空の部屋の画像を表示状態にする（ただし透明）
+        emptyRoomImage.classList.remove('hidden');
+        
+        // 少し遅延を入れてからフェードを開始
+        setTimeout(() => {
+            console.log("フェード処理実行");
+            // 怒りの黒水の画像を徐々に消す
+            angerImage.style.opacity = "0";
+            emptyRoomImage.style.opacity = "1";
+            
+            // フェードが完了するのを待つ（3秒）
+            setTimeout(() => {
+                console.log("フェード完了");
+                // フェードが完了したら次のボタンをクリックできるようにする
+                const nextButton = document.getElementById('next-button');
+                if (nextButton) {
+                    nextButton.style.display = 'block';
+                }
+            }, 3000);
+        }, 100);
     }
 }
 

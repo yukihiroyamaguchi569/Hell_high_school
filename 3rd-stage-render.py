@@ -96,6 +96,10 @@ def init_session_state():
                  
             質問：高校の文化祭の名前は何やった？
             答え：男く祭（おとこくさい）
+            
+            質問：附設の裏にあった商店の通称はなんや？
+            答え：裏店（うらみせ）
+            ヒント：高校のすぐ裏にあった
 
             質問：附設高校が共学になった年はわかるや？
             答え：2005年
@@ -127,7 +131,7 @@ def init_session_state():
                 十一代 2017- 町田健
 
             ### 最後の会話
-            参加者が9問とも正解したら、「まじか！全問正解かい」というコメントをしてください。
+            参加者がすべての問題を終了したら、「これでゲーム終了だ」というコメントをしてください。
 
             ### 口調
             福岡の筑後弁で挑発的な態度でしゃべってください。
@@ -460,6 +464,7 @@ def display_success():
                 
     俺様が間違っていたということか…………
                 
+    仕方がない……　元の附設に戻して、これからは附設の未来のために尽くすとするか
                 
     """)
     # 「次へ」ボタン（中央揃え）
@@ -471,17 +476,29 @@ def display_success():
 
 
 def display_form():
-    st.markdown("<h1 style='text-align: center;'>チーム登録フォーム</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>ゲーム終了！</h1>", unsafe_allow_html=True)
     
     # Google FormsのURL
     form_url = "https://forms.gle/rb4sn5wxWBDssZGy6"
     
     st.markdown(f"""
-    ### 以下のフォームを入力せよ！
+    
+    皆さまの力で、附設高校は黒水校長の支配から開放されました！
+                
+    ありがとうございました！！
+                
+    同窓会ゲーム「漆黒の遥藍地」お楽しみ頂けましたでしょうか？
+        
+    AIとの会話を楽しんでいただけなら幸いです。
+                
+    さて、ゲームはここで終了となりますが、ぜひ皆さまのご感想をお聞かせください。
+                
+    今後の企画の参考とさせていただきますので、以下のアンケートにご協力をお願いいたします。
+                
     """)
 
     # フォームの埋め込み表示
-    st.components.v1.iframe(form_url, height=600)
+    st.components.v1.iframe(form_url, height=1200)
     
 
 def display_quiz_intro():
@@ -527,7 +544,7 @@ def display_quiz():
         format_message(msg['role'], msg['content'], chat_area, is_new_message=False)
         
         # 最後のメッセージが成功メッセージかチェック
-        if msg == st.session_state.messages[-1] and "全問正解" in msg['content'] and not st.session_state.quiz_completed:
+        if msg == st.session_state.messages[-1] and "ゲーム終了" in msg['content'] and not st.session_state.quiz_completed:
             st.session_state.quiz_completed = True
             st.session_state.game_state = 'success'
             st.rerun()

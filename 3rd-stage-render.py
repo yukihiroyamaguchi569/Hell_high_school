@@ -423,7 +423,7 @@ def display_opening():
     # カラムの比率を変更して中央の列をより大きく
     col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
-        st.image("src/images/manager-room-door.png", use_container_width=True)
+        st.image("src/images/ruined-door.jpg", use_container_width=True)
     
     # 次へボタン（中央揃え）
     col1, col2, col3 = st.columns([1, 2, 1])

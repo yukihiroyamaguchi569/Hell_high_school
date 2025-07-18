@@ -194,26 +194,8 @@ def init_session_state():
             st.session_state.avatar_image = avatar_data
         else:
             st.session_state.avatar_image = None
-    if 'tts_enabled' not in st.session_state:
-        st.session_state.tts_enabled = True
     if 'quiz_completed' not in st.session_state:
         st.session_state.quiz_completed = False
-
-def generate_speech(text):
-    """Generate speech from text using OpenAI TTS"""
-    try:
-        response = client.audio.speech.create(
-            model="tts-1",
-            voice="ash",  # 男性の声で挑発的な感じ
-            input=text,
-            speed=1.0  # 少しゆっくりめで威厳のある感じ
-        )
-        
-        # 直接バイトデータを返す（バッファ操作を省略）
-        return response.content
-    except Exception as e:
-        st.error(f"音声生成エラー: {str(e)}")
-        return None
 
 def load_css():
     """Return CSS for the chat interface"""
@@ -428,21 +410,7 @@ def format_message(role, content, container, is_new_message=False):
         with container.chat_message("user"):
             st.write(content)
     else:
-        # TTSが有効で、新しいメッセージの場合のみ音声を先に生成・再生
-        if st.session_state.tts_enabled and is_new_message:
-            audio_bytes = generate_speech(content)
-            if audio_bytes:
-                # Base64エンコードしてHTMLに埋め込み
-                audio_b64 = base64.b64encode(audio_bytes).decode()
-                
-                # 音声を先に再生（簡略化されたHTML）
-                container.markdown(f"""
-                <audio autoplay style="display: none;">
-                    <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
-                </audio>
-                """, unsafe_allow_html=True)
-        
-        # 音声再生後にメッセージを表示
+        # メッセージを表示
         with container.chat_message("assistant", avatar=st.session_state.avatar_image):
             st.write(content)
 
@@ -511,40 +479,13 @@ def display_opening():
         # 入力値が4桁になったら自動チェック
         if pin_code and len(pin_code) == 6:
             if pin_code == "442222":
-                # ドアが開く音を再生
-                try:
-                    with open("src/audio/door-open.mp3", "rb") as f:
-                        audio_bytes = f.read()
-                    
-                    # Base64エンコードしてHTMLに埋め込み
-                    audio_b64 = base64.b64encode(audio_bytes).decode()
-                    
-                    st.markdown(f"""
-                    <audio autoplay style="display: none;">
-                        <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
-                    </audio>
-                    <script>
-                        // 音声再生を確実にするためのJavaScript
-                        document.addEventListener('DOMContentLoaded', function() {{
-                            const audio = document.querySelector('audio[autoplay]');
-                            if (audio) {{
-                                audio.play().catch(function(error) {{
-                                    console.log('音声再生に失敗しました:', error);
-                                }});
-                            }}
-                        }});
-                    </script>
-                    """, unsafe_allow_html=True)
-                except FileNotFoundError:
-                    st.warning("音声ファイルが見つかりません: src/audio/door-open.mp3")
-                
                 # 開いたドアの画像を表示
                 col1, col2, col3 = st.columns([1, 3, 1])
                 with col2:
                     st.image("src/images/manager-room-empty.png", use_container_width=True)
                 
                 st.success("鍵が開いた・・")
-                # 音が再生されるまで少し待機
+                # 少し待機
                 time.sleep(2)
                 st.session_state.game_state = 'quiz_intro'
                 st.rerun()
@@ -633,17 +574,12 @@ def display_quiz():
     # チャットメッセージの表示エリア
     chat_area = st.container()
     
-    # 過去のメッセージを表示（TTSなし）
-    for i, msg in enumerate(st.session_state.messages[:-1] if st.session_state.messages else []):
+    # メッセージを表示
+    for msg in st.session_state.messages:
         format_message(msg['role'], msg['content'], chat_area, is_new_message=False)
-    
-    # 最新のメッセージのみTTS処理を行う
-    if st.session_state.messages:
-        latest_msg = st.session_state.messages[-1]
-        format_message(latest_msg['role'], latest_msg['content'], chat_area, is_new_message=True)
         
         # 最後のメッセージが成功メッセージかチェック
-        if "全問正解" in latest_msg['content'] and not st.session_state.quiz_completed:
+        if msg == st.session_state.messages[-1] and "全問正解" in msg['content'] and not st.session_state.quiz_completed:
             st.session_state.quiz_completed = True
             st.session_state.game_state = 'success'
             st.rerun()
@@ -683,15 +619,6 @@ def main():
     
     init_session_state()
     st.markdown(load_css(), unsafe_allow_html=True)
-    
-    # TTS設定のトグルボタン（クイズ画面でのみ表示）
-    if st.session_state.game_state == 'quiz':
-        with st.sidebar:
-            st.markdown("### 音声設定")
-            tts_enabled = st.toggle("音声読み上げ", value=st.session_state.tts_enabled)
-            if tts_enabled != st.session_state.tts_enabled:
-                st.session_state.tts_enabled = tts_enabled
-                st.rerun()
     
     # メインコンテンツエリア
     st.markdown('<div class="main-content">', unsafe_allow_html=True)

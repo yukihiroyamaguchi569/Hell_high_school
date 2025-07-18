@@ -469,28 +469,13 @@ def display_opening():
     with col2:
         st.image("src/images/manager-room-door.png", use_container_width=True)
     
-    st.markdown("<h2 style='text-align: center;'>暗証番号を入力せよ</h2>", unsafe_allow_html=True)
-    
-    # 暗証番号入力（中央揃え、4桁用の幅）
+    # 次へボタン（中央揃え）
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        pin_code = st.text_input("暗証番号", type="password", placeholder="６桁の数字", max_chars=6, key="pin_input", label_visibility="collapsed")
-        
-        # 入力値が4桁になったら自動チェック
-        if pin_code and len(pin_code) == 6:
-            if pin_code == "442222":
-                # 開いたドアの画像を表示
-                col1, col2, col3 = st.columns([1, 3, 1])
-                with col2:
-                    st.image("src/images/manager-room-empty.png", use_container_width=True)
-                
-                st.success("鍵が開いた・・")
-                # 少し待機
-                time.sleep(2)
-                st.session_state.game_state = 'quiz_intro'
-                st.rerun()
-            else:
-                st.error("暗証番号が間違っているようだ")
+        if st.button("扉を開く", key="open_door_button", use_container_width=True):
+
+            st.session_state.game_state = 'quiz_intro'
+            st.rerun()
     
     col1, col2, col3 = st.columns([1, 1, 1])
 
@@ -543,7 +528,7 @@ def display_quiz_intro():
     # より均等な配置のためのcolumns設定
     col1, col2, col3 = st.columns([1, 2, 1])  # 比率を[1, 2, 1]に変更してより中央に寄せる
     with col2:
-        st.image("src/images/manager-room-empty.png", width=1200)
+        st.image("src/images/principals-office.png", width=1200)
  
     st.markdown("""
         <div style="background-color: #212121;">

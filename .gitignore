@@ -8,3 +8,4 @@ __pycache__/
 src/credentials/
 src/credentials/hell-highschool-40eb2d572293.json
 src/credentials/elevenlabs-api-key.txt
+src/credentials/gemini-api-key.txt

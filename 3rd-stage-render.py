@@ -406,6 +406,10 @@ def display_title():
         if st.button("ゲームスタート", key="game_start_button"):
             st.session_state.game_state = 'opening'
             st.rerun()
+        # デバッグ用ボタン
+        if st.button("デバッグ: 成功画面へ", key="debug_success_button"):
+            st.session_state.game_state = 'success'
+            st.rerun()
     
     col1, col2, col3 = st.columns([1, 1, 1])
 
@@ -452,23 +456,19 @@ def display_success():
     
     st.markdown("""
     
-    「ちぃぃっ……こげんもんじゃなかっちゃな……よかたい、次は体育館で決着ばつけちゃるばい！」
-
-    言い終えた瞬間、彼の足元にあった床がゴウン……と沈み込む。次の瞬間、床板が裂けるように開き、漆黒の通路が姿を現した。
-
-    校長は迷いなく、その闇の中へと走り去る
-
-    あなた方は、校長を追うように、通路へと駆け出した
-
-    しかし体育館の入口で、黒いドアに行く手を阻まれてしまった。ここから先は選ばれたチームしか進めないようだ
+    「ちぃぃっ……この俺様が負けるとは……
+                
+    俺様が間違っていたということか…………
+                
+                
     """)
-    
-    # フォーム画面への遷移ボタン
+    # 「次へ」ボタン（中央揃え）
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("フォームを送信する", key="form_button"):
+        if st.button("次へ", key="to_form_button", use_container_width=True):
             st.session_state.game_state = 'form'
             st.rerun()
+
 
 def display_form():
     st.markdown("<h1 style='text-align: center;'>チーム登録フォーム</h1>", unsafe_allow_html=True)

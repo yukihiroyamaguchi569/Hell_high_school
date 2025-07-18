@@ -411,9 +411,9 @@ def display_title():
             st.session_state.game_state = 'opening'
             st.rerun()
         # デバッグ用ボタン
-        if st.button("デバッグ: 成功画面へ", key="debug_success_button"):
-            st.session_state.game_state = 'success'
-            st.rerun()
+        #if st.button("デバッグ: 成功画面へ", key="debug_success_button"):
+        #    st.session_state.game_state = 'success'
+        #    st.rerun()
     
     col1, col2, col3 = st.columns([1, 1, 1])
 

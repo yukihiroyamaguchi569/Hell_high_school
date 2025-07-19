@@ -910,3 +910,20 @@ function typeWriter(element, text, speed = 30) {
 
 // 初期化を実行
 document.addEventListener('DOMContentLoaded', init); 
+
+// 隠しボタンでクイズ2画面に遷移
+window.addEventListener('DOMContentLoaded', function() {
+    var hiddenQuiz2Btn = document.getElementById('hidden-jump-to-quiz2');
+    if (hiddenQuiz2Btn) {
+        hiddenQuiz2Btn.addEventListener('click', function() {
+            // クイズ2用の状態初期化とプロンプトセット
+            gameState.currentQuiz = 'quiz2';
+            gameState.quiz1Completed = true;
+            gameState.messages = [];
+            gameState.openaiMessages = [
+                { role: 'system', content: prompts.quiz2 }
+            ];
+            showScreen('quiz2');
+        });
+    }
+}); 

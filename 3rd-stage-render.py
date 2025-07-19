@@ -433,10 +433,7 @@ def display_opening():
             st.session_state.game_state = 'quiz_intro'
             st.rerun()
     
-    col1, col2, col3 = st.columns([1, 1, 1])
-
-    st.markdown("<p style='text-align: center'>Built with <a href='https://streamlit.io'>Streamlit</a></p>", unsafe_allow_html=True)
-
+ 
 def display_success():
     # カラムの比率を変更して中央の列をより大きく
     col1, col2, col3 = st.columns([1, 3, 1])
@@ -493,7 +490,7 @@ def display_quiz_intro():
     # より均等な配置のためのcolumns設定
     col1, col2, col3 = st.columns([1, 2, 1])  # 比率を[1, 2, 1]に変更してより中央に寄せる
     with col2:
-        st.image("src/images/manager-room-empty.png", width=1200)
+        st.image("src/images/principals-office.png", width=1200)
  
     st.markdown("""
         <div style="background-color: #212121;">

@@ -172,6 +172,17 @@ function setupEventListeners() {
     addSidebarToggle('quiz');
     addSidebarToggle('quiz2');
     
+    // サイドバーの「クイズ2へジャンプ」ボタン
+    document.getElementById('jump-to-quiz2-sidebar').addEventListener('click', () => {
+        gameState.currentQuiz = 'quiz2';
+        gameState.quiz1Completed = true;
+        gameState.messages = [];
+        gameState.openaiMessages = [
+            { role: 'system', content: prompts.quiz2 }
+        ];
+        showScreen('quiz2');
+    });
+    
     // クイズ1画面
     // 送信ボタンは削除されたのでエンターキーのみで送信
     document.getElementById('user-input').addEventListener('keypress', (e) => {
